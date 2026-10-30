@@ -1,0 +1,36 @@
+{
+  "@context": ["http://www.w3.org/ns/csvw", {
+    "mvikg": "https://w3id.org/mvikg#",
+    "mvikgbox": "https://w3id.org/mvikg/abox#",
+    "biolink": "https://w3id.org/biolink/vocab/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  }],
+  "url": "Variants.csv",
+  "tableSchema": {
+    "columns": [
+      { "name": "doc_id",           "titles": "doc_id",           "datatype": "string", "suppressOutput": true },
+      { "name": "organism_context", "titles": "organism_context", "datatype": "string", "suppressOutput": true },
+      { "name": "variant_gene",     "titles": "variant_gene",     "datatype": "string", "suppressOutput": true, "note": "Joins to Genes.csv gene column for this doc_id; used to build the biolink:has_sequence_variant link from the gene node." },
+      { "name": "variant_id",       "titles": "variant_id",       "datatype": "string", "suppressOutput": true },
+      { "name": "location_start",   "titles": "location_start",   "datatype": "integer", "propertyUrl": "biolink:start_coordinate", "aboutUrl": "mvikgbox:VARIANT-{variant_id}-{variant_gene}-inRec{doc_id}-{_row}" },
+      { "name": "location_end",     "titles": "location_end",     "datatype": "integer", "propertyUrl": "biolink:end_coordinate",   "aboutUrl": "mvikgbox:VARIANT-{variant_id}-{variant_gene}-inRec{doc_id}-{_row}" },
+      { "name": "ref",              "titles": "ref",              "datatype": "string",  "propertyUrl": "mvikg:ref",    "aboutUrl": "mvikgbox:VARIANT-{variant_id}-{variant_gene}-inRec{doc_id}-{_row}" },
+      { "name": "alt",              "titles": "alt",              "datatype": "string",  "propertyUrl": "mvikg:alt",    "aboutUrl": "mvikgbox:VARIANT-{variant_id}-{variant_gene}-inRec{doc_id}-{_row}" },
+      { "name": "length",           "titles": "length",           "datatype": "integer", "propertyUrl": "mvikg:length", "aboutUrl": "mvikgbox:VARIANT-{variant_id}-{variant_gene}-inRec{doc_id}-{_row}" },
+      { "name": "effect",           "titles": "effect",           "datatype": "string",  "propertyUrl": "mvikg:effect", "aboutUrl": "mvikgbox:VARIANT-{variant_id}-{variant_gene}-inRec{doc_id}-{_row}" },
+      { "name": "hgvs_notation",
+        "titles": "hgvs_notation",
+        "datatype": "string",
+        "propertyUrl": "biolink:hgvs_nomenclature",
+        "aboutUrl": "mvikgbox:VARIANT-{variant_id}-{variant_gene}-inRec{doc_id}-{_row}",
+        "note": "If both hgvs_notation and location_start/ref/alt are present, a post-processing consistency check (outside CSVW) flags a mismatch for review rather than silently preferring one."
+      },
+      { "name": "variant_type",     "titles": "variant_type",     "datatype": "string",  "propertyUrl": "rdf:type", "valueUrl": "http://purl.obolibrary.org/obo/SO_{variant_type}", "aboutUrl": "mvikgbox:VARIANT-{variant_id}-{variant_gene}-inRec{doc_id}-{_row}" },
+      { "name": "evidence",         "titles": "evidence",         "datatype": "string",  "suppressOutput": true }
+    ],
+    "aboutUrl": "mvikgbox:VARIANT-{variant_id}-{variant_gene}-inRec{doc_id}-{_row}",
+    "foreignKeys": [
+      { "columnReference": ["doc_id", "variant_gene"], "reference": { "resource": "Genes.csv", "columnReference": ["doc_id", "gene"] } }
+    ]
+  }
+}

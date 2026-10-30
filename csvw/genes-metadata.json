@@ -1,0 +1,43 @@
+{
+  "@context": ["http://www.w3.org/ns/csvw", {
+    "mvikg": "https://w3id.org/mvikg#",
+    "mvikgbox": "https://w3id.org/mvikg/abox#",
+    "sosa": "http://www.w3.org/ns/sosa/",
+    "dcterms": "http://purl.org/dc/terms/",
+    "biolink": "https://w3id.org/biolink/vocab/",
+    "uniprotkb": "https://www.uniprot.org/uniprotkb/"
+  }],
+  "url": "Genes.csv",
+  "tableSchema": {
+    "columns": [
+      { "name": "doc_id",            "titles": "doc_id",            "datatype": "string", "suppressOutput": true },
+      { "name": "organism_context",  "titles": "organism_context",  "datatype": "string", "suppressOutput": true, "note": "Must match a strain_name/taxon_name from Strains.csv for this doc_id; used only to build aboutUrl, not emitted as a triple." },
+      { "name": "gene",
+        "titles": "gene",
+        "datatype": "string",
+        "propertyUrl": "http://www.w3.org/2000/01/rdf-schema#label",
+        "aboutUrl": "mvikgbox:GENE-{gene}-inRec{doc_id}-{_row}"
+      },
+      { "name": "ncbi_gene_id",
+        "titles": "ncbi_gene_id",
+        "datatype": "string",
+        "propertyUrl": "dcterms:identifier",
+        "valueUrl": "https://www.ncbi.nlm.nih.gov/gene/{ncbi_gene_id}",
+        "aboutUrl": "mvikgbox:GENE-{gene}-inRec{doc_id}-{_row}",
+        "note": "Record-scoped gene node still gets dcterms:identifier one hop to the canonical/global gene URI as today; this column adds a second, external identifier link when the submitter supplied one and it passed validation."
+      },
+      { "name": "uniprot_accession",
+        "titles": "uniprot_accession",
+        "datatype": "string",
+        "propertyUrl": "dcterms:identifier",
+        "valueUrl": "uniprotkb:{uniprot_accession}",
+        "aboutUrl": "mvikgbox:GENE-{gene}-inRec{doc_id}-{_row}"
+      },
+      { "name": "evidence", "titles": "evidence", "datatype": "string", "suppressOutput": true }
+    ],
+    "aboutUrl": "mvikgbox:GENE-{gene}-inRec{doc_id}-{_row}",
+    "foreignKeys": [
+      { "columnReference": ["doc_id", "organism_context"], "reference": { "resource": "Strains.csv", "columnReference": ["doc_id", "strain_name"] } }
+    ]
+  }
+}

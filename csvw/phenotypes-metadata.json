@@ -1,0 +1,33 @@
+{
+  "@context": ["http://www.w3.org/ns/csvw", {
+    "mvikg": "https://w3id.org/mvikg#",
+    "mvikgbox": "https://w3id.org/mvikg/abox#",
+    "biolink": "https://w3id.org/biolink/vocab/",
+    "dcterms": "http://purl.org/dc/terms/",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+  }],
+  "url": "Phenotypes.csv",
+  "tableSchema": {
+    "columns": [
+      { "name": "doc_id",     "titles": "doc_id",     "datatype": "string", "suppressOutput": true },
+      { "name": "variant_id", "titles": "variant_id", "datatype": "string", "suppressOutput": true, "note": "Joins back to Variants.csv (doc_id, variant_id) -> gene -> the gene_blank node phenotypes actually attach to, per the existing gene-scoped (not variant-scoped) phenotype pattern in kgBuilderClaudeSkills.py." },
+      { "name": "phenotype_description", "titles": "phenotype_description", "datatype": "string", "propertyUrl": "rdfs:label",         "aboutUrl": "mvikgbox:PHENOTYPE-{variant_id}-inRec{doc_id}-{_row}" },
+      { "name": "ontology_term",
+        "titles": "ontology_term",
+        "datatype": "string",
+        "propertyUrl": "rdf:type",
+        "valueUrl": "{ontology_term}",
+        "aboutUrl": "mvikgbox:PHENOTYPE-{variant_id}-inRec{doc_id}-{_row}",
+        "note": "Only emitted if the submitter supplied a full CURIE/URI (e.g. GO:0009636, CHEBI:...) and it resolves. Free text alone stays in phenotype_description as a literal — no guessed ontology matches, matching existing biome-text policy."
+      },
+      { "name": "phenotype_objective",   "titles": "phenotype_objective",   "datatype": "string", "propertyUrl": "dcterms:description", "aboutUrl": "mvikgbox:PHENOTYPE-{variant_id}-inRec{doc_id}-{_row}" },
+      { "name": "type_of_experiment",    "titles": "type_of_experiment",    "datatype": "string", "propertyUrl": "mvikg:typeOfExperiment", "aboutUrl": "mvikgbox:PHENOTYPE-{variant_id}-inRec{doc_id}-{_row}" },
+      { "name": "context_sentence",      "titles": "context_sentence",      "datatype": "string", "propertyUrl": "rdfs:comment", "aboutUrl": "mvikgbox:PHENOTYPE-{variant_id}-inRec{doc_id}-{_row}" },
+      { "name": "comparison_to",         "titles": "comparison_to",         "datatype": "string", "propertyUrl": "mvikg:comparedTo", "aboutUrl": "mvikgbox:PHENOTYPE-{variant_id}-inRec{doc_id}-{_row}" }
+    ],
+    "aboutUrl": "mvikgbox:PHENOTYPE-{variant_id}-inRec{doc_id}-{_row}",
+    "foreignKeys": [
+      { "columnReference": ["doc_id", "variant_id"], "reference": { "resource": "Variants.csv", "columnReference": ["doc_id", "variant_id"] } }
+    ]
+  }
+}

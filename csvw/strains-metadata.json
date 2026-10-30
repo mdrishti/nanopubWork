@@ -1,0 +1,49 @@
+{
+  "@context": ["http://www.w3.org/ns/csvw", {
+    "mvikg": "https://w3id.org/mvikg#",
+    "mvikgbox": "https://w3id.org/mvikg/abox#",
+    "sosa": "http://www.w3.org/ns/sosa/",
+    "dcterms": "http://purl.org/dc/terms/",
+    "dcmitype": "http://purl.org/dc/dcmitype/",
+    "biolink": "https://w3id.org/biolink/vocab/",
+    "ncbitaxon": "http://purl.obolibrary.org/obo/NCBITaxon_",
+    "ncbiproject": "https://www.ncbi.nlm.nih.gov/bioproject/?term=",
+    "pmc": "https://www.ncbi.nlm.nih.gov/pmc/articles/"
+  }],
+  "url": "Strains.csv",
+  "tableSchema": {
+    "columns": [
+      { "name": "doc_id",           "titles": "doc_id",           "datatype": "string", "suppressOutput": true },
+      { "name": "strain_name",      "titles": "strain_name",      "datatype": "string", "propertyUrl": "http://www.w3.org/2000/01/rdf-schema#label", "aboutUrl": "mvikgbox:SAMPLE-{strain_name}-inRec{doc_id}-{_row}",
+        "note": "Matches kgBuilderClaudeSkills.py:347-348 -- rdfs:label on the SAMPLE node (taxon_uri), not the ORGANISM node." },
+      { "name": "taxon_name",       "titles": "taxon_name",       "datatype": "string", "suppressOutput": true },
+      { "name": "taxon_id",         "titles": "taxon_id",         "datatype": "string", "suppressOutput": true },
+      { "name": "ncbi_taxon_id",
+        "titles": "ncbi_taxon_id",
+        "datatype": "string",
+        "propertyUrl": "biolink:in_taxon",
+        "valueUrl": "ncbitaxon:{ncbi_taxon_id}",
+        "aboutUrl": "mvikgbox:ORGANISM-{strain_name}-inRec{doc_id}-{_row}",
+        "note": "Matches kgBuilderClaudeSkills.py:363 -- biolink:in_taxon lives on the ORGANISM node, not the SAMPLE node. Only emitted when ncbi_taxon_id is present and has already passed live NCBI validation upstream of CSVW generation; rows lacking it fall through to the existing name-based resolver, not this mapping."
+      },
+      { "name": "genome_accession",
+        "titles": "genome_accession",
+        "datatype": "string",
+        "propertyUrl": "dcterms:identifier",
+        "aboutUrl": "mvikgbox:SAMPLE-{strain_name}-inRec{doc_id}-{_row}",
+        "note": "On SAMPLE, matching where kgBuilderClaudeSkills.py:368 puts the existing Accession column's dcterms:identifier."
+      },
+      { "name": "Project ID",       "titles": "Project ID",       "datatype": "string", "suppressOutput": true,
+        "note": "Handled by add_document_provenance() in render_submission_rdf.py instead -- that function unconditionally mints a PROJECT node per row (from this column if present, else from doc_id) and connects it, matching kgBuilderClaudeSkills.py:315-321,355 exactly. A plain CSVW column mapping can't express the 'always mint, with a fallback' behavior." },
+      { "name": "PMC ID",           "titles": "PMC ID",           "datatype": "string", "suppressOutput": true,
+        "note": "Handled by add_document_provenance() instead -- the real builder routes this through an intermediate IAO section resource (kgBuilderClaudeSkills.py:323-333,358-362), not a direct SAMPLE-to-PMC triple, which is more than a column-to-predicate mapping can express." },
+      { "name": "Accession",       "titles": "Accession",        "datatype": "string", "propertyUrl": "dcterms:identifier", "aboutUrl": "mvikgbox:SAMPLE-{strain_name}-inRec{doc_id}-{_row}" },
+      { "name": "biome",            "titles": "biome",            "datatype": "string", "propertyUrl": "mvikg:has_biome", "aboutUrl": "mvikgbox:SAMPLE-{strain_name}-inRec{doc_id}-{_row}",
+        "note": "Predicate fixed to match kgBuilderClaudeSkills.py:390/399 (mvikg:has_biome) -- this mapping previously used a nonexistent mvikg:biome." },
+      { "name": "evidence",         "titles": "evidence",         "datatype": "string", "suppressOutput": true, "note": "Consumed by the review/evidence step (ECO:0000305 / ECO:0000035 pattern), not mapped directly to a triple here." }
+    ],
+    "aboutUrl": "mvikgbox:SAMPLE-{strain_name}-inRec{doc_id}-{_row}",
+    "primaryKey": ["doc_id", "strain_name"],
+    "note": "Table default subject is now the SAMPLE node (matches kgBuilderClaudeSkills.py's taxon_uri), not the ORGANISM node. The ORGANISM node and the sosa:isSampleOf / rdf:type sosa:Sample triples connecting the two are minted by add_sample_organism_structure() in render_submission_rdf.py -- this file's per-column aboutUrl overrides place each triple on the correct one of the two, but CSVW's row-at-a-time model can't mint the second node or the edge between them itself."
+  }
+}
