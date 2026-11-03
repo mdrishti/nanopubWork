@@ -25,13 +25,14 @@ sub:assertion {
 
   sub:assertion a nt:AssertionTemplate, nt:UnlistedTemplate ;
     rdfs:label "Declaring an MVIKG gene-variant observation" ;
-    dct:description "Captures a gene's sequence variant, as modeled by the MVIKG ontology (http://example.org/mvikg#), together with the gene's taxon, and optionally the variant's frequency, the biome the taxon was sampled from, and a phenotype the gene is associated with. The core backbone (gene, variant, taxon) is required; everything else is optional, since not every source record fills every field. Statement order follows the ontology's own property order (object properties, then data properties)." ;
-    nt:hasNanopubLabelPattern "Sequence variant of ${gene}" ;
+    dct:description "Captures a gene's sequence variant, as modeled by the MVIKG ontology (http://example.org/mvikg#), together with the gene's taxon, and optionally the variant's frequency, the biome the taxon was sampled from, a phenotype the gene is associated with, the variant's name/notation, its Sequence Ontology type, its start coordinate, and supporting evidence text. The core backbone (gene, variant, taxon) is required; everything else is optional, since not every source record fills every field. Statement order follows the ontology's own property order (object properties, then data properties)." ;
+    nt:hasNanopubLabelPattern "${variantName}" ;
     nt:hasTag "Biology" ;
     nt:hasTargetNanopubType biolink:SequenceVariant ;
     nt:hasStatement sub:st1, sub:st2, sub:st3, sub:st4, sub:freqGroup, sub:st5, sub:st6, sub:st7,
       sub:st8, sub:st9, sub:st10, sub:phenotypeGroup, sub:st11, sub:st12, sub:st13, sub:st14,
-      sub:st15, sub:st16 .
+      sub:st15, sub:st16, sub:st17, sub:st18, sub:st19, sub:evidenceGroup, sub:st20, sub:st21,
+      sub:st22, sub:st23 .
 
   # ---- required backbone: gene, taxon, variant ----
 
@@ -61,11 +62,19 @@ sub:assertion {
 
   # mvikg:comparedTo (data property, on a phenotype associated with the gene) — grouped: all-or-nothing
   sub:phenotypeGroup a nt:GroupedStatement, nt:OptionalStatement ;
-    nt:hasStatement sub:st11, sub:st12, sub:st13 .
+    nt:hasStatement sub:st11, sub:st12, sub:st13, sub:st23 .
 
   sub:st11 rdf:subject sub:gene ; rdf:predicate biolink:has_phenotype ; rdf:object sub:phenotype .
   sub:st12 rdf:subject sub:phenotype ; rdf:predicate rdf:type ; rdf:object biolink:PhenotypicFeature .
   sub:st13 rdf:subject sub:phenotype ; rdf:predicate mvikg:comparedTo ; rdf:object sub:comparedTo .
+
+  # rdfs:label on the phenotype itself -- a prose description, not an
+  # opaque minted identifier (same rationale as sub:variantName on the
+  # variant: this is what a submitter recognizes afterwards, and what
+  # Nanodash would otherwise have to render as the bare local-resource IRI).
+  # Non-optional *within* the group: if the phenotype group fires at all,
+  # it must carry a readable label.
+  sub:st23 rdf:subject sub:phenotype ; rdf:predicate rdfs:label ; rdf:object sub:phenotypeDescription .
 
   # mvikg:effect (data property)
   sub:st14 a nt:OptionalStatement ;
@@ -78,6 +87,30 @@ sub:assertion {
   # mvikg:ref (data property)
   sub:st16 a nt:OptionalStatement ;
     rdf:subject sub:variant ; rdf:predicate mvikg:ref ; rdf:object sub:ref .
+
+  # rdfs:label on the variant itself (its short name/notation, e.g. "T77I").
+  # Required (not nt:OptionalStatement): this is also the only field that
+  # feeds nt:hasNanopubLabelPattern, so without it every variant of a given
+  # gene produces an identically-labeled, indistinguishable nanopub in a
+  # listing/export.
+  sub:st17 rdf:subject sub:variant ; rdf:predicate rdfs:label ; rdf:object sub:variantName .
+
+  # rdf:type on the variant -- its Sequence Ontology classification, in
+  # addition to the fixed biolink:SequenceVariant type (st4)
+  sub:st18 a nt:OptionalStatement ;
+    rdf:subject sub:variant ; rdf:predicate rdf:type ; rdf:object sub:soType .
+
+  # biolink:start_coordinate (data property)
+  sub:st19 a nt:OptionalStatement ;
+    rdf:subject sub:variant ; rdf:predicate biolink:start_coordinate ; rdf:object sub:startCoordinate .
+
+  # biolink:has_evidence (object property, nested ECO evidence node) -- grouped: all-or-nothing
+  sub:evidenceGroup a nt:GroupedStatement, nt:OptionalStatement ;
+    nt:hasStatement sub:st20, sub:st21, sub:st22 .
+
+  sub:st20 rdf:subject sub:variant ; rdf:predicate biolink:has_evidence ; rdf:object sub:evidence .
+  sub:st21 rdf:subject sub:evidence ; rdf:predicate rdf:type ; rdf:object <http://purl.obolibrary.org/obo/ECO_0000305> .
+  sub:st22 rdf:subject sub:evidence ; rdf:predicate dct:description ; rdf:object sub:evidenceText .
 
   # ---- placeholder declarations ----
 
@@ -105,7 +138,7 @@ sub:assertion {
 
   sub:biome a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
     rdfs:label "the biome the taxon was sampled from (GOLD biome recommended)" ;
-    nt:possibleValuesFromApi "https://www.wikidata.org/w/api.php?action=wbsearchentities&language=en&format=json&limit=5&search=" .
+    nt:possibleValuesFromApi "https://www.ebi.ac.uk/ols4/api/select?ontology=gold&fieldList=iri,label,description&q=" .
 
   sub:alt a nt:LiteralPlaceholder ;
     rdfs:label "alternate allele" .
@@ -116,6 +149,9 @@ sub:assertion {
   sub:comparedTo a nt:LiteralPlaceholder ;
     rdfs:label "compared to (the baseline/control the phenotype outcome was compared against)" .
 
+  sub:phenotypeDescription a nt:LiteralPlaceholder ;
+    rdfs:label "phenotype description (prose, e.g. \"DeltarfaH mutant elicited ROS production...\")" .
+
   sub:effect a nt:LiteralPlaceholder ;
     rdfs:label "variant effect" .
 
@@ -124,6 +160,23 @@ sub:assertion {
 
   sub:ref a nt:LiteralPlaceholder ;
     rdfs:label "reference allele" .
+
+  sub:variantName a nt:LiteralPlaceholder ;
+    rdfs:label "variant name/notation (e.g. T77I)" .
+
+  sub:soType a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "sequence variant type (Sequence Ontology)" ;
+    nt:possibleValuesFromApi "https://www.ebi.ac.uk/ols4/api/select?ontology=so&fieldList=iri,label,description&q=" .
+
+  sub:startCoordinate a nt:LiteralPlaceholder ;
+    nt:hasDatatype xsd:integer ;
+    rdfs:label "start coordinate (variant position)" .
+
+  sub:evidence a nt:EmbeddedResource, nt:LocalResource ;
+    rdfs:label "evidence for this variant" .
+
+  sub:evidenceText a nt:LiteralPlaceholder ;
+    rdfs:label "evidence text (quote/description from the source)" .
 
   # ---- labels for fixed vocabulary terms used above ----
 
@@ -144,6 +197,11 @@ sub:assertion {
   qudt:QuantityValue rdfs:label "quantity value" .
   qudt:numericValue rdfs:label "numeric value" .
   qudt:hasUnit rdfs:label "unit" .
+  rdfs:label rdfs:label "label" .
+  biolink:start_coordinate rdfs:label "start coordinate" .
+  biolink:has_evidence rdfs:label "has evidence" .
+  dct:description rdfs:label "description" .
+  <http://purl.obolibrary.org/obo/ECO_0000305> rdfs:label "evidence" .
 }
 
 sub:provenance {
