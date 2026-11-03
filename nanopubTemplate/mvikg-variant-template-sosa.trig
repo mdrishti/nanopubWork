@@ -26,7 +26,7 @@ sub:Head {
 sub:assertion {
 
   sub:assertion a nt:AssertionTemplate, nt:UnlistedTemplate ;
-    rdfs:label "Declaring an MVIKG gene-variant observation (sosa-faithful)" ;
+    rdfs:label "Declaring an MVIKG gene-variant observation (sosa links)" ;
     dct:description "Declaring an MVIKG gene-variant observation";
     nt:hasNanopubLabelPattern "${variantName}" ;
     nt:hasTag "Biology" ;
@@ -242,7 +242,7 @@ sub:provenance {
 
 sub:pubinfo {
   this: dct:created "2026-11-03T13:45:00Z"^^xsd:dateTime ;
-    rdfs:label "Declaring an MVIKG gene-variant observation (sosa-faithful)" ;
+    rdfs:label "Declaring an MVIKG gene-variant observation (sosa links)" ;
     dct:creator orcid:0000-0000-0000-0000 ;
     dct:license <https://creativecommons.org/licenses/by/4.0/> ;
     nt:wasCreatedFromTemplate <https://w3id.org/np/RAgeON_vGgJCt5E4DPMi0eOPaGwNv9tbfFTRZtBwdQL0w> ;
