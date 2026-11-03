@@ -1,0 +1,251 @@
+@prefix this: <http://purl.org/nanopub/temp/np001/> .
+@prefix sub: <http://purl.org/nanopub/temp/np001/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix nt: <https://w3id.org/np/o/ntemplate/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix orcid: <https://orcid.org/> .
+@prefix mvikg: <http://example.org/mvikg/> .
+@prefix biolink: <https://w3id.org/biolink/vocab/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+
+sub:Head {
+  this: a np:Nanopublication ;
+    np:hasAssertion sub:assertion ;
+    np:hasProvenance sub:provenance ;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+
+  sub:assertion a nt:AssertionTemplate, nt:UnlistedTemplate ;
+    rdfs:label "Declaring an MVIKG gene-variant observation (sosa-faithful)" ;
+    dct:description "Declaring an MVIKG gene-variant observation";
+    nt:hasNanopubLabelPattern "${variantName}" ;
+    nt:hasTag "Biology" ;
+    nt:hasTargetNanopubType biolink:SequenceVariant ;
+    nt:hasStatement sub:st1, sub:st2a, sub:st2b, sub:st2c, sub:st3, sub:st4, sub:freqGroup, sub:st5,
+      sub:st6, sub:st7, sub:st8, sub:st9, sub:st10, sub:phenotypeGroup, sub:st11, sub:st12,
+      sub:st13, sub:st23, sub:st14, sub:st15, sub:st16, sub:st17, sub:st18, sub:st19,
+      sub:evidenceGroup, sub:st20, sub:st21, sub:st22, sub:pmcGroup, sub:st24, sub:st25 .
+
+  # ---- required backbone: gene, sample, organism, taxon, variant ----
+  # (the only change from the flat template: gene->taxon is reached through
+  # the Sample/Organism nodes, not a direct biolink:in_taxon
+  # edge -- this is what lets sosa: links and PMC provenance attach at all)
+
+  sub:st1 rdf:subject sub:gene ; rdf:predicate rdf:type ; rdf:object biolink:Gene .
+  sub:st2a rdf:subject sub:gene ; rdf:predicate sosa:isFeatureOfInterestOf ; rdf:object sub:sample .
+  sub:st2b rdf:subject sub:sample ; rdf:predicate sosa:isSampleOf ; rdf:object sub:organism .
+  sub:st2c rdf:subject sub:organism ; rdf:predicate biolink:in_taxon ; rdf:object sub:taxon .
+  sub:st3 rdf:subject sub:gene ; rdf:predicate biolink:has_sequence_variant ; rdf:object sub:variant .
+  sub:st4 rdf:subject sub:variant ; rdf:predicate rdf:type ; rdf:object biolink:SequenceVariant .
+
+  # ---- optional, in the ontology's own property order ----
+
+  # mvikg:frequency (object property, nested qudt:QuantityValue) — grouped: all-or-nothing
+  sub:freqGroup a nt:GroupedStatement, nt:OptionalStatement ;
+    nt:hasStatement sub:st5, sub:st6, sub:st7, sub:st8 .
+
+  sub:st5 rdf:subject sub:variant ; rdf:predicate mvikg:frequency ; rdf:object sub:freq .
+  sub:st6 rdf:subject sub:freq ; rdf:predicate rdf:type ; rdf:object qudt:QuantityValue .
+  sub:st7 rdf:subject sub:freq ; rdf:predicate qudt:numericValue ; rdf:object sub:freqValue .
+  sub:st8 rdf:subject sub:freq ; rdf:predicate qudt:hasUnit ; rdf:object sub:freqUnit .
+
+  # mvikg:has_biome (object property, on the taxon the gene is in)
+  sub:st9 a nt:OptionalStatement ;
+    rdf:subject sub:taxon ; rdf:predicate mvikg:has_biome ; rdf:object sub:biome .
+
+  # mvikg:alt (data property)
+  sub:st10 a nt:OptionalStatement ;
+    rdf:subject sub:variant ; rdf:predicate mvikg:alt ; rdf:object sub:alt .
+
+  # mvikg:comparedTo (data property, on a phenotype associated with the gene) — grouped: all-or-nothing
+  sub:phenotypeGroup a nt:GroupedStatement, nt:OptionalStatement ;
+    nt:hasStatement sub:st11, sub:st12, sub:st13, sub:st23 .
+
+  sub:st11 rdf:subject sub:gene ; rdf:predicate biolink:has_phenotype ; rdf:object sub:phenotype .
+  sub:st12 rdf:subject sub:phenotype ; rdf:predicate rdf:type ; rdf:object biolink:PhenotypicFeature .
+  sub:st13 rdf:subject sub:phenotype ; rdf:predicate mvikg:comparedTo ; rdf:object sub:comparedTo .
+
+  # rdfs:label on the phenotype itself -- a prose description, not an
+  # opaque minted identifier. Non-optional *within* the group.
+  sub:st23 rdf:subject sub:phenotype ; rdf:predicate rdfs:label ; rdf:object sub:phenotypeDescription .
+
+  # mvikg:effect (data property)
+  sub:st14 a nt:OptionalStatement ;
+    rdf:subject sub:variant ; rdf:predicate mvikg:effect ; rdf:object sub:effect .
+
+  # mvikg:length (data property)
+  sub:st15 a nt:OptionalStatement ;
+    rdf:subject sub:variant ; rdf:predicate mvikg:length ; rdf:object sub:length .
+
+  # mvikg:ref (data property)
+  sub:st16 a nt:OptionalStatement ;
+    rdf:subject sub:variant ; rdf:predicate mvikg:ref ; rdf:object sub:ref .
+
+  # rdfs:label on the variant itself (its short name/notation, e.g. "T77I").
+  # Required: also the only field feeding nt:hasNanopubLabelPattern.
+  sub:st17 rdf:subject sub:variant ; rdf:predicate rdfs:label ; rdf:object sub:variantName .
+
+  # rdf:type on the variant -- its Sequence Ontology classification, in
+  # addition to the fixed biolink:SequenceVariant type (st4)
+  sub:st18 a nt:OptionalStatement ;
+    rdf:subject sub:variant ; rdf:predicate rdf:type ; rdf:object sub:soType .
+
+  # biolink:start_coordinate (data property)
+  sub:st19 a nt:OptionalStatement ;
+    rdf:subject sub:variant ; rdf:predicate biolink:start_coordinate ; rdf:object sub:startCoordinate .
+
+  # biolink:end_coordinate (data property)
+  sub:st26 a nt:OptionalStatement ;
+    rdf:subject sub:variant ; rdf:predicate biolink:end_coordinate ; rdf:object sub:endCoordinate .
+
+  # biolink:has_evidence (object property, nested ECO evidence node) -- grouped: all-or-nothing
+  sub:evidenceGroup a nt:GroupedStatement, nt:OptionalStatement ;
+    nt:hasStatement sub:st20, sub:st21, sub:st22 .
+
+  sub:st20 rdf:subject sub:variant ; rdf:predicate biolink:has_evidence ; rdf:object sub:evidence .
+  sub:st21 rdf:subject sub:evidence ; rdf:predicate rdf:type ; rdf:object <http://purl.obolibrary.org/obo/ECO_0000305> .
+  sub:st22 rdf:subject sub:evidence ; rdf:predicate dct:description ; rdf:object sub:evidenceText .
+
+  # dcterms:isPartOf (object property, the sample's source PMC article/dataset)
+  # — grouped: all-or-nothing. This is the whole point of this template
+  # variant: the sample node is what carries PMC provenance in the real
+  # builder's output, and the flat template has no sample node to hang it on.
+  sub:pmcGroup a nt:GroupedStatement, nt:OptionalStatement ;
+    nt:hasStatement sub:st24, sub:st25 .
+
+  sub:st24 rdf:subject sub:sample ; rdf:predicate dct:isPartOf ; rdf:object sub:project .
+  sub:st25 rdf:subject sub:project ; rdf:predicate rdf:type ; rdf:object dcmitype:Dataset .
+
+  # ---- placeholder declarations ----
+
+  sub:gene a nt:AgentPlaceholder, nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "the gene this variant and (optionally) phenotype belong to" ;
+    nt:possibleValuesFromApi "https://w3id.org/np/l/nanopub-query-1.1/api/RAom4OoQ8U2K6A629YRXKo9-XU-ZJM7-KZs1h11OD6c1w/find-things?type=https://w3id.org/biolink/vocab/Gene" .
+
+  sub:sample a nt:EmbeddedResource, nt:LocalResource ;
+    rdfs:label "the sample this gene was observed in" .
+
+  sub:organism a nt:EmbeddedResource, nt:LocalResource ;
+    rdfs:label "the strain/organism this sample was taken from" .
+
+  sub:taxon a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "the organism taxon the strain belongs to (NCBITaxon)" ;
+    nt:possibleValuesFromApi "https://www.ebi.ac.uk/ols/api/select?ontology=ncbitaxon&fieldList=iri,label,description&q=" .
+
+  sub:variant a nt:IntroducedResource, nt:LocalResource ;
+    rdfs:label "this sequence variant" .
+
+  sub:freq a nt:EmbeddedResource, nt:LocalResource ;
+    rdfs:label "the variant's frequency" .
+
+  sub:freqValue a nt:LiteralPlaceholder ;
+    nt:hasDatatype xsd:decimal ;
+    rdfs:label "frequency value" .
+
+  sub:freqUnit a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    nt:possibleValue unit:PERCENT, unit:UNITLESS ;
+    rdfs:label "frequency unit" .
+
+  sub:biome a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "the biome the taxon was sampled from (GOLD biome recommended)" ;
+    nt:possibleValuesFromApi "https://www.ebi.ac.uk/ols4/api/select?ontology=gold&fieldList=iri,label,description&q=" .
+
+  sub:alt a nt:LiteralPlaceholder ;
+    rdfs:label "alternate allele" .
+
+  sub:phenotype a nt:EmbeddedResource, nt:LocalResource ;
+    rdfs:label "the phenotype associated with this gene" .
+
+  sub:comparedTo a nt:LiteralPlaceholder ;
+    rdfs:label "compared to (the baseline/control the phenotype outcome was compared against)" .
+
+  sub:phenotypeDescription a nt:LiteralPlaceholder ;
+    rdfs:label "phenotype description (prose, e.g. \"DeltarfaH mutant elicited ROS production...\")" .
+
+  sub:effect a nt:LiteralPlaceholder ;
+    rdfs:label "variant effect" .
+
+  sub:length a nt:LiteralPlaceholder ;
+    rdfs:label "variant length (free text — not all source rows give a clean integer)" .
+
+  sub:ref a nt:LiteralPlaceholder ;
+    rdfs:label "reference allele" .
+
+  sub:variantName a nt:LiteralPlaceholder ;
+    rdfs:label "variant name/notation (e.g. T77I)" .
+
+  sub:soType a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "sequence variant type (Sequence Ontology)" ;
+    nt:possibleValuesFromApi "https://www.ebi.ac.uk/ols4/api/select?ontology=so&fieldList=iri,label,description&q=" .
+
+  sub:startCoordinate a nt:LiteralPlaceholder ;
+    nt:hasDatatype xsd:integer ;
+    rdfs:label "start coordinate (variant position)" .
+
+  sub:endCoordinate a nt:LiteralPlaceholder ;
+    nt:hasDatatype xsd:integer ;
+    rdfs:label "end coordinate (variant position)" .
+
+  sub:evidence a nt:EmbeddedResource, nt:LocalResource ;
+    rdfs:label "evidence for this variant" .
+
+  sub:evidenceText a nt:LiteralPlaceholder ;
+    rdfs:label "evidence text (quote/description from the source)" .
+
+  sub:project a nt:ExternalUriPlaceholder ;
+    rdfs:label "the PMC article/dataset this record is derived from (PMC URI, e.g. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3079231/)" .
+
+  # ---- labels for fixed vocabulary terms used above ----
+
+  rdf:type rdfs:label "is a" .
+  biolink:has_sequence_variant rdfs:label "has sequence variant" .
+  biolink:in_taxon rdfs:label "in taxon" .
+  biolink:has_phenotype rdfs:label "has phenotype" .
+  biolink:SequenceVariant rdfs:label "sequence variant" .
+  biolink:Gene rdfs:label "gene" .
+  biolink:PhenotypicFeature rdfs:label "phenotypic feature" .
+  mvikg:frequency rdfs:label "frequency" .
+  mvikg:has_biome rdfs:label "has biome" .
+  mvikg:alt rdfs:label "alternate allele" .
+  mvikg:comparedTo rdfs:label "compared to" .
+  mvikg:effect rdfs:label "variant effect" .
+  mvikg:length rdfs:label "variant length" .
+  mvikg:ref rdfs:label "reference allele" .
+  qudt:QuantityValue rdfs:label "quantity value" .
+  qudt:numericValue rdfs:label "numeric value" .
+  qudt:hasUnit rdfs:label "unit" .
+  rdfs:label rdfs:label "label" .
+  biolink:start_coordinate rdfs:label "start coordinate" .
+  biolink:end_coordinate rdfs:label "end coordinate" .
+  biolink:has_evidence rdfs:label "has evidence" .
+  dct:description rdfs:label "description" .
+  <http://purl.obolibrary.org/obo/ECO_0000305> rdfs:label "evidence" .
+  sosa:isFeatureOfInterestOf rdfs:label "is feature of interest of" .
+  sosa:isSampleOf rdfs:label "is sample of" .
+  dct:isPartOf rdfs:label "is part of" .
+  dcmitype:Dataset rdfs:label "dataset" .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo orcid:0000-0000-0000-0000 .
+}
+
+sub:pubinfo {
+  this: dct:created "2026-11-03T13:45:00Z"^^xsd:dateTime ;
+    rdfs:label "Declaring an MVIKG gene-variant observation (sosa-faithful)" ;
+    dct:creator orcid:0000-0000-0000-0000 ;
+    dct:license <https://creativecommons.org/licenses/by/4.0/> ;
+    nt:wasCreatedFromTemplate <https://w3id.org/np/RAgeON_vGgJCt5E4DPMi0eOPaGwNv9tbfFTRZtBwdQL0w> ;
+    nt:wasCreatedFromProvenanceTemplate <https://w3id.org/np/RA-yPZEYODCS39dWOWm7NA_ClOGFHzPi8iYhLzoZf19GI> ;
+    nt:wasCreatedFromPubinfoTemplate <https://w3id.org/np/RA4o9JqSxNO2Z47itbAcxvpVfdR97t_7usxmdR90URXQs> .
+}
