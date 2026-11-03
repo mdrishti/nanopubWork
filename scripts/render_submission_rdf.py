@@ -130,19 +130,40 @@ def validate_strains(rows: list[dict]) -> None:
 
 
 def validate_genes(rows: list[dict]) -> None:
+    """
+    Validate ncbi_gene_id/uniprot_accession and enforce that at most one of
+    them survives into the row for CSVW to see.
+
+    The real builder (kgBuilderClaudeSkills.py) gives a gene's record-scoped
+    node exactly one dcterms:identifier edge -- verified against generated
+    output, never two. genes-metadata.json maps both ncbi_gene_id and
+    uniprot_accession to dcterms:identifier on that same node, so if both
+    columns reach CSVW non-empty, the gene node gets two identifier edges,
+    which never happens in real builder output. ncbi_gene_id wins when both
+    are supplied and valid (NCBI Gene is the more specific identifier for a
+    gene vs. UniProt, which identifies the protein product); a field that
+    fails validation is blanked rather than handed to CSVW, per
+    csvw/README.md ("only fields that already passed validation should be
+    present when CSVW runs") -- so an invalid ID does not survive as a
+    dcterms:identifier either, it only survives in the evidence flag.
+    """
     for r in rows:
         gene_symbol = r.get("gene", "")
         ncbi_gene_id = r.get("ncbi_gene_id", "")
+        ncbi_gene_id_valid = False
         if ncbi_gene_id:
             result = validate_ncbi_gene_id(ncbi_gene_id, gene_symbol)
             if result["status"] == "mismatch":
                 _append_evidence(r, "ECO:0000035",
                                   f"ncbi_gene_id {ncbi_gene_id} official symbol "
                                   f"'{result['fetched_symbol']}' does not match claimed '{gene_symbol}'")
+                r["ncbi_gene_id"] = ""
             elif result["status"] == "not_found":
                 _append_evidence(r, "ECO:0000035", f"ncbi_gene_id {ncbi_gene_id} not found in NCBI Gene")
+                r["ncbi_gene_id"] = ""
             else:
                 _append_evidence(r, "ECO:0000305", f"ncbi_gene_id {ncbi_gene_id} validated against NCBI Gene")
+                ncbi_gene_id_valid = True
 
         uniprot_accession = r.get("uniprot_accession", "")
         if uniprot_accession:
@@ -151,10 +172,18 @@ def validate_genes(rows: list[dict]) -> None:
                 _append_evidence(r, "ECO:0000035",
                                   f"uniprot_accession {uniprot_accession} gene names "
                                   f"{result['fetched_symbols']} do not match claimed '{gene_symbol}'")
+                r["uniprot_accession"] = ""
             elif result["status"] == "not_found":
                 _append_evidence(r, "ECO:0000035", f"uniprot_accession {uniprot_accession} not found in UniProt")
+                r["uniprot_accession"] = ""
             else:
                 _append_evidence(r, "ECO:0000305", f"uniprot_accession {uniprot_accession} validated against UniProt")
+                if ncbi_gene_id_valid:
+                    # Both supplied and both valid: ncbi_gene_id wins the single
+                    # dcterms:identifier slot; uniprot_accession's evidence note
+                    # above is kept for traceability, but the field itself is
+                    # cleared so CSVW does not also emit it.
+                    r["uniprot_accession"] = ""
 
 
 def resolve_variant_types(rows: list[dict], so_name_to_id: dict) -> None:
