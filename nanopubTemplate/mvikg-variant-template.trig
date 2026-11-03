@@ -103,6 +103,10 @@ sub:assertion {
   # biolink:start_coordinate (data property)
   sub:st19 a nt:OptionalStatement ;
     rdf:subject sub:variant ; rdf:predicate biolink:start_coordinate ; rdf:object sub:startCoordinate .
+  
+  # biolink:end_coordinate (data property)
+  sub:st26 a nt:OptionalStatement ;
+    rdf:subject sub:variant ; rdf:predicate biolink:end_coordinate ; rdf:object sub:endCoordinate .
 
   # biolink:has_evidence (object property, nested ECO evidence node) -- grouped: all-or-nothing
   sub:evidenceGroup a nt:GroupedStatement, nt:OptionalStatement ;
@@ -172,6 +176,10 @@ sub:assertion {
     nt:hasDatatype xsd:integer ;
     rdfs:label "start coordinate (variant position)" .
 
+  sub:endCoordinate a nt:LiteralPlaceholder ;
+    nt:hasDatatype xsd:integer ;
+    rdfs:label "end coordinate (variant position)" .
+
   sub:evidence a nt:EmbeddedResource, nt:LocalResource ;
     rdfs:label "evidence for this variant" .
 
@@ -199,6 +207,7 @@ sub:assertion {
   qudt:hasUnit rdfs:label "unit" .
   rdfs:label rdfs:label "label" .
   biolink:start_coordinate rdfs:label "start coordinate" .
+  biolink:end_coordinate rdfs:label "end coordinate" .
   biolink:has_evidence rdfs:label "has evidence" .
   dct:description rdfs:label "description" .
   <http://purl.obolibrary.org/obo/ECO_0000305> rdfs:label "evidence" .
