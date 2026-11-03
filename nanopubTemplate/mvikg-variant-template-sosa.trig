@@ -33,7 +33,7 @@ sub:assertion {
     nt:hasTargetNanopubType biolink:SequenceVariant ;
     nt:hasStatement sub:st1, sub:st2a, sub:st2b, sub:st2c, sub:st3, sub:st4, sub:freqGroup, sub:st5,
       sub:st6, sub:st7, sub:st8, sub:st9, sub:st10, sub:phenotypeGroup, sub:st11, sub:st12,
-      sub:st13, sub:st23, sub:st14, sub:st15, sub:st16, sub:st17, sub:st18, sub:st19,
+      sub:st13, sub:st23, sub:st14, sub:st15, sub:st16, sub:st17, sub:st18, sub:st19, sub:st26,
       sub:evidenceGroup, sub:st20, sub:st21, sub:st22, sub:pmcGroup, sub:st24, sub:st25 .
 
   # ---- required backbone: gene, sample, organism, taxon, variant ----
