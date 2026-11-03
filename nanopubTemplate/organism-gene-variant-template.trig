@@ -1,0 +1,149 @@
+@prefix this: <http://purl.org/nanopub/temp/np001/> .
+@prefix sub: <http://purl.org/nanopub/temp/np001/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix nt: <https://w3id.org/np/o/ntemplate/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix orcid: <https://orcid.org/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix bl: <https://w3id.org/biolink/vocab/> .
+@prefix mvikg: <http://example.org/mvikg/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+
+sub:Head {
+  this: a np:Nanopublication ;
+    np:hasAssertion sub:assertion ;
+    np:hasProvenance sub:provenance ;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+  sub:template a nt:AssertionTemplate ;
+    rdfs:label "Declaring an organism-gene-variant observation (MVIKG)" ;
+    dct:description "Links a sampled organism's taxonomic classification to a gene and a sequence variant (mutation) found in it, following the MVIKG ontology. Required: sample/taxon, gene, variant with ref/alt alleles. Optional: developmental stage, biome, the ENA/SRA dataset the sample is part of, variant effect/length/frequency, and the associated phenotype." ;
+    nt:hasStatement sub:st00a, sub:st00b, sub:st01, sub:st02, sub:st03, sub:st04, sub:st06, sub:st07,
+      sub:st08, sub:st09, sub:st10, sub:st11, sub:st12, sub:st13, sub:st14, sub:st15, sub:st16, sub:st17, sub:st18 .
+
+  # --- introduced/local resources (blank-node-like instances minted by this nanopub) ---
+  sub:sample a nt:LocalResource ;
+    rdfs:label "organism sample" .
+
+  sub:variant a nt:LocalResource ;
+    rdfs:label "sequence variant" .
+
+  sub:quantity a nt:LocalResource ;
+    rdfs:label "variant frequency value" .
+
+  # --- required placeholders: organism / taxon ---
+  sub:taxon a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "organism taxon (e.g. an NCBITaxon IRI)" ;
+    nt:possibleValuesFromApi "https://www.wikidata.org/w/api.php?action=wbsearchentities&language=en&format=json&limit=5&search=" .
+
+  # --- required placeholders: gene ---
+  sub:gene a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "gene affected by the variant (e.g. an Ensembl gene IRI)" ;
+    nt:possibleValuesFromApi "https://www.wikidata.org/w/api.php?action=wbsearchentities&language=en&format=json&limit=5&search=" .
+
+  # --- required placeholders: variant alleles ---
+  sub:variant_id a nt:LiteralPlaceholder ;
+    rdfs:label "variant identifier (e.g. an HGVS or VCF-style ID) — SequenceVariant requires exactly one bl:id" .
+
+  sub:ref a nt:LiteralPlaceholder ;
+    nt:hasRegex "[ACGTNacgtn.-]*" ;
+    rdfs:label "reference allele" .
+
+  sub:alt a nt:LiteralPlaceholder ;
+    nt:hasRegex "[ACGTNacgtn.-]*" ;
+    rdfs:label "alternate allele" .
+
+  # --- optional placeholders: developmental stage / biome ---
+  sub:devstage a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "developmental stage (growth phase) of the sampled organism" ;
+    nt:possibleValuesFromApi "https://w3id.org/np/l/nanopub-query-1.1/api/RAom4OoQ8U2K6A629YRXKo9-XU-ZJM7-KZs1h11OD6c1w/find-things?type=http://example.org/mvikg/DevelopmentalStage" .
+
+  sub:biome a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "biome (controlled term, e.g. a GOLD biome IRI)" .
+
+  sub:biome_text a nt:LiteralPlaceholder ;
+    rdfs:label "biome (free text, only if no controlled term applies)" .
+
+  # --- optional placeholder: ENA/SRA dataset the sample is part of ---
+  sub:dataset a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "ENA/SRA project or dataset the sample is part of" .
+
+  # --- optional placeholders: variant effect / length / frequency ---
+  sub:effect a nt:LiteralPlaceholder ;
+    rdfs:label "variant effect (e.g. missense_variant)" .
+
+  sub:length a nt:LiteralPlaceholder ;
+    rdfs:label "variant length" .
+
+  sub:freqvalue a nt:LiteralPlaceholder ;
+    nt:hasDatatype xsd:decimal ;
+    rdfs:label "observed frequency (numeric value)" .
+
+  sub:frequnit a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "frequency unit (e.g. qudt:PERCENT)" ;
+    nt:hasDefaultValue <http://qudt.org/vocab/unit/PERCENT> .
+
+  # --- optional placeholder: phenotype ---
+  sub:phenotype a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "associated phenotype" ;
+    nt:possibleValuesFromApi "https://www.wikidata.org/w/api.php?action=wbsearchentities&language=en&format=json&limit=5&search=" .
+
+  # === required statements ===
+  sub:st01 rdf:subject sub:sample ; rdf:predicate rdf:type ; rdf:object sosa:Sample .
+  sub:st02 rdf:subject sub:sample ; rdf:predicate bl:in_taxon ; rdf:object sub:taxon .
+  sub:st03 rdf:subject sub:taxon ; rdf:predicate rdf:type ; rdf:object bl:OrganismTaxon .
+  sub:st04 rdf:subject sub:gene ; rdf:predicate rdf:type ; rdf:object bl:Gene .
+  sub:st05 rdf:subject sub:gene ; rdf:predicate bl:in_taxon ; rdf:object sub:taxon .
+  sub:st06 rdf:subject sub:variant ; rdf:predicate rdf:type ; rdf:object bl:SequenceVariant .
+  sub:st07 rdf:subject sub:variant ; rdf:predicate bl:is_sequence_variant_of ; rdf:object sub:gene .
+  sub:st08 rdf:subject sub:variant ; rdf:predicate mvikg:ref ; rdf:object sub:ref .
+  sub:st09 rdf:subject sub:variant ; rdf:predicate mvikg:alt ; rdf:object sub:alt .
+
+  # === optional statements ===
+  sub:st10 rdf:subject sub:sample ; rdf:predicate mvikg:has_developmental_stage ; rdf:object sub:devstage .
+  sub:st10 nt:optStatement "true"^^xsd:boolean .
+
+  sub:st11 rdf:subject sub:sample ; rdf:predicate mvikg:has_biome ; rdf:object sub:biome .
+  sub:st11 nt:optStatement "true"^^xsd:boolean .
+
+  sub:st12 rdf:subject sub:sample ; rdf:predicate dct:isPartOf ; rdf:object sub:dataset .
+  sub:st12 nt:optStatement "true"^^xsd:boolean .
+
+  sub:st13 rdf:subject sub:variant ; rdf:predicate mvikg:effect ; rdf:object sub:effect .
+  sub:st13 nt:optStatement "true"^^xsd:boolean .
+
+  sub:st14 rdf:subject sub:variant ; rdf:predicate mvikg:length ; rdf:object sub:length .
+  sub:st14 nt:optStatement "true"^^xsd:boolean .
+
+  sub:st15 rdf:subject sub:variant ; rdf:predicate mvikg:frequency ; rdf:object sub:quantity .
+  sub:st15 nt:optStatement "true"^^xsd:boolean .
+
+  sub:st16 rdf:subject sub:quantity ; rdf:predicate qudt:numericValue ; rdf:object sub:freqvalue .
+  sub:st16 nt:optStatement "true"^^xsd:boolean .
+
+  sub:st17 rdf:subject sub:variant ; rdf:predicate bl:has_phenotype ; rdf:object sub:phenotype .
+  sub:st17 nt:optStatement "true"^^xsd:boolean .
+
+  sub:st18 rdf:subject sub:quantity ; rdf:predicate qudt:unit ; rdf:object sub:frequnit .
+  sub:st18 nt:optStatement "true"^^xsd:boolean .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo orcid:USER-ORCID .
+}
+
+sub:pubinfo {
+  this: dct:created "2026-11-02T12:37:43Z"^^xsd:dateTime ;
+    rdfs:label "Declaring an organism-gene-variant observation (MVIKG)" ;
+    dct:creator orcid:USER-ORCID ;
+    dct:license <https://creativecommons.org/licenses/by/4.0/> ;
+    npx:introduces sub:template .
+}

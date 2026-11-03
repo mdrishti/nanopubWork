@@ -1,0 +1,70 @@
+@prefix this: <http://purl.org/nanopub/temp/np001/> .
+@prefix sub: <http://purl.org/nanopub/temp/np001/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix nt: <https://w3id.org/np/o/ntemplate/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix orcid: <https://orcid.org/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix bl: <https://w3id.org/biolink/vocab/> .
+@prefix mvikg: <http://example.org/mvikg/> .
+
+sub:Head {
+  this: a np:Nanopublication ;
+    np:hasAssertion sub:assertion ;
+    np:hasProvenance sub:provenance ;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+  sub:template a nt:AssertionTemplate ;
+    rdfs:label "Declaring an organism sample's taxonomic classification (MVIKG)" ;
+    dct:description "Records the taxonomic classification of a sampled organism, the biome it was collected from, and its developmental stage at sampling time, per the MVIKG ontology's organism-side terms (bl:OrganismTaxon, sosa:Sample, mvikg:has_biome, mvikg:has_developmental_stage)." ;
+    nt:hasStatement sub:st1, sub:st2, sub:st3, sub:st4, sub:st5, sub:st6 .
+
+  sub:sample a nt:LocalResource ;
+    rdfs:label "organism sample" .
+
+  sub:taxon a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "organism taxon (e.g. an NCBITaxon IRI)" ;
+    nt:possibleValuesFromApi "https://www.wikidata.org/w/api.php?action=wbsearchentities&language=en&format=json&limit=5&search=" .
+
+  sub:biome a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "biome (controlled term, e.g. a GOLD biome IRI)" .
+
+  sub:biome_text a nt:LiteralPlaceholder ;
+    rdfs:label "biome (free text, only if no controlled term applies)" .
+
+  sub:devstage a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "developmental stage" ;
+    nt:possibleValuesFromApi "https://w3id.org/np/l/nanopub-query-1.1/api/RAom4OoQ8U2K6A629YRXKo9-XU-ZJM7-KZs1h11OD6c1w/find-things?type=http://example.org/mvikg/DevelopmentalStage" .
+
+  sub:st1 rdf:subject sub:sample ; rdf:predicate rdf:type ; rdf:object sosa:Sample .
+  sub:st2 rdf:subject sub:sample ; rdf:predicate bl:in_taxon ; rdf:object sub:taxon .
+  sub:st3 rdf:subject sub:taxon ; rdf:predicate rdf:type ; rdf:object bl:OrganismTaxon .
+
+  sub:st4 rdf:subject sub:sample ; rdf:predicate mvikg:has_biome ; rdf:object sub:biome .
+  sub:st4 nt:optStatement "true"^^xsd:boolean .
+
+  sub:st5 rdf:subject sub:sample ; rdf:predicate mvikg:has_biome ; rdf:object sub:biome_text .
+  sub:st5 nt:optStatement "true"^^xsd:boolean .
+
+  sub:st6 rdf:subject sub:sample ; rdf:predicate mvikg:has_developmental_stage ; rdf:object sub:devstage .
+  sub:st6 nt:optStatement "true"^^xsd:boolean .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo orcid:USER-ORCID .
+}
+
+sub:pubinfo {
+  this: dct:created "2026-11-02T12:37:43Z"^^xsd:dateTime ;
+    rdfs:label "Declaring an organism sample's taxonomic classification (MVIKG)" ;
+    dct:creator orcid:USER-ORCID ;
+    dct:license <https://creativecommons.org/licenses/by/4.0/> ;
+    npx:introduces sub:template .
+}

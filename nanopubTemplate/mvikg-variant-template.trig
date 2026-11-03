@@ -1,0 +1,161 @@
+@prefix this: <http://purl.org/nanopub/temp/np001/> .
+@prefix sub: <http://purl.org/nanopub/temp/np001/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix nt: <https://w3id.org/np/o/ntemplate/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix orcid: <https://orcid.org/> .
+@prefix mvikg: <http://example.org/mvikg/> .
+@prefix biolink: <https://w3id.org/biolink/vocab/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+
+sub:Head {
+  this: a np:Nanopublication ;
+    np:hasAssertion sub:assertion ;
+    np:hasProvenance sub:provenance ;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+
+  sub:assertion a nt:AssertionTemplate, nt:UnlistedTemplate ;
+    rdfs:label "Declaring an MVIKG gene-variant observation" ;
+    dct:description "Captures a gene's sequence variant, as modeled by the MVIKG ontology (http://example.org/mvikg#), together with the gene's taxon, and optionally the variant's frequency, the biome the taxon was sampled from, and a phenotype the gene is associated with. The core backbone (gene, variant, taxon) is required; everything else is optional, since not every source record fills every field. Statement order follows the ontology's own property order (object properties, then data properties)." ;
+    nt:hasNanopubLabelPattern "Sequence variant of ${gene}" ;
+    nt:hasTag "Biology" ;
+    nt:hasTargetNanopubType biolink:SequenceVariant ;
+    nt:hasStatement sub:st1, sub:st2, sub:st3, sub:st4, sub:freqGroup, sub:st5, sub:st6, sub:st7,
+      sub:st8, sub:st9, sub:st10, sub:phenotypeGroup, sub:st11, sub:st12, sub:st13, sub:st14,
+      sub:st15, sub:st16 .
+
+  # ---- required backbone: gene, taxon, variant ----
+
+  sub:st1 rdf:subject sub:gene ; rdf:predicate rdf:type ; rdf:object biolink:Gene .
+  sub:st2 rdf:subject sub:gene ; rdf:predicate biolink:in_taxon ; rdf:object sub:taxon .
+  sub:st3 rdf:subject sub:gene ; rdf:predicate biolink:has_sequence_variant ; rdf:object sub:variant .
+  sub:st4 rdf:subject sub:variant ; rdf:predicate rdf:type ; rdf:object biolink:SequenceVariant .
+
+  # ---- optional, in the ontology's own property order ----
+
+  # mvikg:frequency (object property, nested qudt:QuantityValue) — grouped: all-or-nothing
+  sub:freqGroup a nt:GroupedStatement, nt:OptionalStatement ;
+    nt:hasStatement sub:st5, sub:st6, sub:st7, sub:st8 .
+
+  sub:st5 rdf:subject sub:variant ; rdf:predicate mvikg:frequency ; rdf:object sub:freq .
+  sub:st6 rdf:subject sub:freq ; rdf:predicate rdf:type ; rdf:object qudt:QuantityValue .
+  sub:st7 rdf:subject sub:freq ; rdf:predicate qudt:numericValue ; rdf:object sub:freqValue .
+  sub:st8 rdf:subject sub:freq ; rdf:predicate qudt:hasUnit ; rdf:object sub:freqUnit .
+
+  # mvikg:has_biome (object property, on the taxon the gene is in)
+  sub:st9 a nt:OptionalStatement ;
+    rdf:subject sub:taxon ; rdf:predicate mvikg:has_biome ; rdf:object sub:biome .
+
+  # mvikg:alt (data property)
+  sub:st10 a nt:OptionalStatement ;
+    rdf:subject sub:variant ; rdf:predicate mvikg:alt ; rdf:object sub:alt .
+
+  # mvikg:comparedTo (data property, on a phenotype associated with the gene) — grouped: all-or-nothing
+  sub:phenotypeGroup a nt:GroupedStatement, nt:OptionalStatement ;
+    nt:hasStatement sub:st11, sub:st12, sub:st13 .
+
+  sub:st11 rdf:subject sub:gene ; rdf:predicate biolink:has_phenotype ; rdf:object sub:phenotype .
+  sub:st12 rdf:subject sub:phenotype ; rdf:predicate rdf:type ; rdf:object biolink:PhenotypicFeature .
+  sub:st13 rdf:subject sub:phenotype ; rdf:predicate mvikg:comparedTo ; rdf:object sub:comparedTo .
+
+  # mvikg:effect (data property)
+  sub:st14 a nt:OptionalStatement ;
+    rdf:subject sub:variant ; rdf:predicate mvikg:effect ; rdf:object sub:effect .
+
+  # mvikg:length (data property)
+  sub:st15 a nt:OptionalStatement ;
+    rdf:subject sub:variant ; rdf:predicate mvikg:length ; rdf:object sub:length .
+
+  # mvikg:ref (data property)
+  sub:st16 a nt:OptionalStatement ;
+    rdf:subject sub:variant ; rdf:predicate mvikg:ref ; rdf:object sub:ref .
+
+  # ---- placeholder declarations ----
+
+  sub:gene a nt:AgentPlaceholder, nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "the gene this variant and (optionally) phenotype belong to" ;
+    nt:possibleValuesFromApi "https://w3id.org/np/l/nanopub-query-1.1/api/RAom4OoQ8U2K6A629YRXKo9-XU-ZJM7-KZs1h11OD6c1w/find-things?type=https://w3id.org/biolink/vocab/Gene" .
+
+  sub:taxon a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "the organism taxon the gene belongs to (NCBITaxon)" ;
+    nt:possibleValuesFromApi "https://www.ebi.ac.uk/ols/api/select?ontology=ncbitaxon&fieldList=iri,label,description&q=" .
+
+  sub:variant a nt:IntroducedResource, nt:LocalResource ;
+    rdfs:label "this sequence variant" .
+
+  sub:freq a nt:EmbeddedResource, nt:LocalResource ;
+    rdfs:label "the variant's frequency" .
+
+  sub:freqValue a nt:LiteralPlaceholder ;
+    nt:hasDatatype xsd:decimal ;
+    rdfs:label "frequency value" .
+
+  sub:freqUnit a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    nt:possibleValue unit:PERCENT, unit:UNITLESS ;
+    rdfs:label "frequency unit" .
+
+  sub:biome a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "the biome the taxon was sampled from (GOLD biome recommended)" ;
+    nt:possibleValuesFromApi "https://www.wikidata.org/w/api.php?action=wbsearchentities&language=en&format=json&limit=5&search=" .
+
+  sub:alt a nt:LiteralPlaceholder ;
+    rdfs:label "alternate allele" .
+
+  sub:phenotype a nt:EmbeddedResource, nt:LocalResource ;
+    rdfs:label "the phenotype associated with this gene" .
+
+  sub:comparedTo a nt:LiteralPlaceholder ;
+    rdfs:label "compared to (the baseline/control the phenotype outcome was compared against)" .
+
+  sub:effect a nt:LiteralPlaceholder ;
+    rdfs:label "variant effect" .
+
+  sub:length a nt:LiteralPlaceholder ;
+    rdfs:label "variant length (free text — not all source rows give a clean integer)" .
+
+  sub:ref a nt:LiteralPlaceholder ;
+    rdfs:label "reference allele" .
+
+  # ---- labels for fixed vocabulary terms used above ----
+
+  rdf:type rdfs:label "is a" .
+  biolink:has_sequence_variant rdfs:label "has sequence variant" .
+  biolink:in_taxon rdfs:label "in taxon" .
+  biolink:has_phenotype rdfs:label "has phenotype" .
+  biolink:SequenceVariant rdfs:label "sequence variant" .
+  biolink:Gene rdfs:label "gene" .
+  biolink:PhenotypicFeature rdfs:label "phenotypic feature" .
+  mvikg:frequency rdfs:label "frequency" .
+  mvikg:has_biome rdfs:label "has biome" .
+  mvikg:alt rdfs:label "alternate allele" .
+  mvikg:comparedTo rdfs:label "compared to" .
+  mvikg:effect rdfs:label "variant effect" .
+  mvikg:length rdfs:label "variant length" .
+  mvikg:ref rdfs:label "reference allele" .
+  qudt:QuantityValue rdfs:label "quantity value" .
+  qudt:numericValue rdfs:label "numeric value" .
+  qudt:hasUnit rdfs:label "unit" .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo orcid:0000-0000-0000-0000 .
+}
+
+sub:pubinfo {
+  this: dct:created "2026-11-02T15:35:12Z"^^xsd:dateTime ;
+    rdfs:label "Declaring an MVIKG gene-variant observation" ;
+    dct:creator orcid:0000-0000-0000-0000 ;
+    dct:license <https://creativecommons.org/licenses/by/4.0/> ;
+    nt:wasCreatedFromTemplate <https://w3id.org/np/RAgeON_vGgJCt5E4DPMi0eOPaGwNv9tbfFTRZtBwdQL0w> ;
+    nt:wasCreatedFromProvenanceTemplate <https://w3id.org/np/RA-yPZEYODCS39dWOWm7NA_ClOGFHzPi8iYhLzoZf19GI> ;
+    nt:wasCreatedFromPubinfoTemplate <https://w3id.org/np/RA4o9JqSxNO2Z47itbAcxvpVfdR97t_7usxmdR90URXQs> .
+}
