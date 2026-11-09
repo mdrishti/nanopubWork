@@ -38,6 +38,7 @@ from src.common.utils_id_validation import (
     validate_ncbi_gene_id,
     validate_uniprot_accession,
     validate_genome_accession,
+    validate_pmc_id,
 )
 from scripts.review_queue import register_submission
 
@@ -101,8 +102,36 @@ def _append_evidence(record: dict, eco_term: str, comment: str) -> None:
     record["evidence"] = f"{existing}; {note}" if existing else note
 
 
+_PMC_ID_RE = re.compile(r"(PMC\d+)", re.IGNORECASE)
+
+
+def _extract_pmc_id(raw: str) -> str:
+    """
+    'PMC ID' can hold either a bare id ('PMC1913268') or the full URI form
+    the template asks for ('https://www.ncbi.nlm.nih.gov/pmc/articles/
+    PMC1913268/') -- validate_pmc_id() takes the bare id, so pull it out of
+    either shape. Returns '' if no PMC id pattern is found.
+    """
+    match = _PMC_ID_RE.search(raw)
+    return match.group(1).upper() if match else ""
+
+
 def validate_strains(rows: list[dict]) -> None:
     for r in rows:
+        pmc_id_raw = r.get("PMC ID", "")
+        if pmc_id_raw:
+            pmc_id = _extract_pmc_id(pmc_id_raw)
+            if not pmc_id:
+                _append_evidence(r, "ECO:0000035", f"PMC ID '{pmc_id_raw}' is not a recognizable PMC id")
+                r["PMC ID"] = ""
+            else:
+                result = validate_pmc_id(pmc_id)
+                if result["status"] == "not_found":
+                    _append_evidence(r, "ECO:0000035", f"PMC ID {pmc_id} not found in EuropePMC")
+                    r["PMC ID"] = ""
+                else:
+                    _append_evidence(r, "ECO:0000305", f"PMC ID {pmc_id} validated against EuropePMC")
+
         taxon_id = r.get("ncbi_taxon_id", "")
         claimed_name = r.get("taxon_name") or r.get("strain_name")
         if taxon_id:
