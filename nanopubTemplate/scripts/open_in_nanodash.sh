@@ -26,7 +26,7 @@ fi
 NP_B64=$(base64 -i "$TRIG_FILE" | tr -d '\n' | tr '+/' '-_' | tr -d '=')
 URL="http://localhost:${PORT}/view?_nanopub_trig=${NP_B64}"
 
-echo "Opening: $URL"
+#echo "Opening: $URL"
 
 if command -v open >/dev/null 2>&1; then
   open "$URL"
@@ -34,5 +34,5 @@ elif command -v xdg-open >/dev/null 2>&1; then
   xdg-open "$URL"
 else
   echo "Could not find 'open' or 'xdg-open'. Open this URL manually:"
-  echo "$URL"
+  #echo "$URL"
 fi
