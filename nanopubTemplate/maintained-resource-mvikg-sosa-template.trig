@@ -1,0 +1,35 @@
+@prefix this: <http://purl.org/nanopub/temp/np001/> .
+@prefix sub: <http://purl.org/nanopub/temp/np001/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix orcid: <https://orcid.org/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix gen: <https://w3id.org/kpxl/gen/terms/> .
+
+sub:Head {
+  this: a np:Nanopublication ;
+    np:hasAssertion sub:assertion ;
+    np:hasProvenance sub:provenance ;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+  <https://w3id.org/np/RAn9lrsf1n_DGY6gsNU73vfjfY0sZoN_2iYRkhZr7JqqY/template> a gen:MaintainedResource ;
+    rdfs:label "Declaring an MVIKG observation" ;
+    dct:description "Assertion template for declaring an MVIKG observation." ;
+    gen:isMaintainedBy <https://w3id.org/spaces/mvikg> .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo orcid:0009-0005-5515-1230 .
+}
+
+sub:pubinfo {
+  this: dct:created "2026-11-04T12:52:45Z"^^xsd:dateTime ;
+    rdfs:label "Declaring an MVIKG observation is maintained by mvikg" ;
+    dct:creator orcid:0009-0005-5515-1230 ;
+    dct:license <https://creativecommons.org/licenses/by/4.0/> .
+}
