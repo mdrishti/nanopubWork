@@ -1,0 +1,214 @@
+@prefix this: <http://purl.org/nanopub/temp/np001/> .
+@prefix sub: <http://purl.org/nanopub/temp/np001/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix nt: <https://w3id.org/np/o/ntemplate/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix orcid: <https://orcid.org/> .
+@prefix mvikg: <http://example.org/mvikg/> .
+@prefix biolink: <https://w3id.org/biolink/vocab/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix gen: <https://w3id.org/kpxl/gen/terms/> .
+
+sub:Head {
+  this: a np:Nanopublication ;
+    np:hasAssertion sub:assertion ;
+    np:hasProvenance sub:provenance ;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+
+  sub:templateVersion a nt:AssertionTemplate, nt:UnlistedTemplate ;
+    dct:isVersionOf sub:template ;
+    gen:governedBy <https://w3id.org/spaces/mvikg> ;
+    rdfs:label "Declaring an MVIKG antibiogram observation" ;
+    dct:description "Declaring a single antibiotic-susceptibility result (MIC/R-S-I call) for an MVIKG sample, independent of any gene or variant. A sample can carry many antibiogram observations. If the paper does tie this result to a specific described variant, that variant can optionally be referenced too." ;
+    nt:hasNanopubLabelPattern "antibiogram: ${antibiotic}" ;
+    nt:hasTag "Biology" ;
+    nt:hasTargetNanopubType biolink:PhenotypicFeature ;
+    nt:hasStatement sub:st01, sub:st02, sub:st03, sub:st04, sub:st05, sub:st06, sub:st07,
+      sub:st08, sub:st09, sub:st10, sub:st11, sub:st12, sub:st13, sub:st16, sub:st17,
+      sub:st18, sub:st19, sub:st20 .
+
+  # Statement numbering reflects display order (sample -> optional variant
+  # link -> phenotype -> susceptibility result properties -> testing
+  # metadata), zero-padded for the same sorting reason documented in
+  # mvikg-variant-template-sosa.trig.
+  #
+  # Deliberately no gene/variant requirement here: unlike
+  # mvikg-variant-template-sosa.trig, this template anchors directly on the
+  # sample (declared by mvikg-sample-taxon-template-sosa.trig). A described
+  # variant is an optional enrichment, not a requirement -- the antibiogram
+  # schema this mirrors treats a null variant_id as normal, not missing data.
+
+  # ---- sample (declared by mvikg-sample-taxon-template-sosa.trig) ----
+
+  sub:st01 rdf:subject sub:phenotype ; rdf:predicate sosa:isResultOf ; rdf:object sub:sample .
+
+  # ---- governing space (every MVIKG-introduced resource belongs to the mvikg KG) ----
+
+  sub:st20 rdf:subject sub:phenotype ; rdf:predicate dct:isPartOf ; rdf:object <https://w3id.org/spaces/mvikg/r/kg> .
+
+  # ---- optional link to a specific variant already declared elsewhere ----
+  # (object property, an already-minted sequence variant) -- grouped:
+  # all-or-nothing, same pattern as the nested object properties below.
+
+  sub:st02 a nt:GroupedStatement, nt:OptionalStatement ;
+    nt:hasStatement sub:st03 .
+
+  sub:st03 rdf:subject sub:phenotype ; rdf:predicate mvikg:isAssociatedWithVariant ; rdf:object sub:variant .
+
+  # ---- phenotype/result node ----
+
+  sub:st04 rdf:subject sub:phenotype ; rdf:predicate rdf:type ; rdf:object biolink:PhenotypicFeature .
+
+  # rdfs:label on the phenotype -- a prose description of the observed
+  # result. Required: also the only field feeding nt:hasNanopubLabelPattern
+  # via sub:antibiotic below (the label pattern references the antibiotic
+  # field directly, as the short human-readable handle for the row).
+  sub:st05 rdf:subject sub:phenotype ; rdf:predicate rdfs:label ; rdf:object sub:phenotypeDescription .
+
+  sub:st06 rdf:subject sub:phenotype ; rdf:predicate dct:description ; rdf:object sub:contextSentence .
+
+  sub:st07 a nt:OptionalStatement ;
+    rdf:subject sub:phenotype ; rdf:predicate mvikg:comparedTo ; rdf:object sub:comparedTo .
+
+  # ---- antibiotic tested ----
+
+  sub:st08 rdf:subject sub:phenotype ; rdf:predicate mvikg:antibiotic ; rdf:object sub:antibiotic .
+
+  sub:st09 a nt:OptionalStatement ;
+    rdf:subject sub:phenotype ; rdf:predicate mvikg:antibioticAroId ; rdf:object sub:antibioticAroId .
+
+  # ---- susceptibility call ----
+
+  sub:st10 a nt:OptionalStatement ;
+    rdf:subject sub:phenotype ; rdf:predicate mvikg:susceptibilityCall ; rdf:object sub:susceptibilityCall .
+
+  # mvikg:micValue + mvikg:micUnit -- flat literal/IRI properties directly
+  # on sub:phenotype (no intermediate quantity node: this template
+  # introduces exactly one resource). Kept grouped: all-or-nothing.
+  sub:st11 a nt:GroupedStatement, nt:OptionalStatement ;
+    nt:hasStatement sub:st12, sub:st13 .
+
+  sub:st12 rdf:subject sub:phenotype ; rdf:predicate mvikg:micValue ; rdf:object sub:micValue .
+  sub:st13 rdf:subject sub:phenotype ; rdf:predicate mvikg:micUnit ; rdf:object sub:micUnit .
+
+  # ---- susceptibility-testing metadata ----
+
+  sub:st16 a nt:OptionalStatement ;
+    rdf:subject sub:phenotype ; rdf:predicate mvikg:typingMethod ; rdf:object sub:typingMethod .
+
+  sub:st17 a nt:OptionalStatement ;
+    rdf:subject sub:phenotype ; rdf:predicate mvikg:breakpointStandard ; rdf:object sub:standard .
+
+  sub:st18 a nt:OptionalStatement ;
+    rdf:subject sub:phenotype ; rdf:predicate mvikg:platform ; rdf:object sub:platform .
+
+  sub:st19 a nt:OptionalStatement ;
+    rdf:subject sub:phenotype ; rdf:predicate rdfs:comment ; rdf:object sub:comment .
+
+  # ---- placeholder declarations ----
+
+  sub:sample a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "the sample this antibiogram result was observed on (declared via the sample-context template)" ;
+    nt:possibleValuesFromApi "https://w3id.org/np/l/nanopub-query-1.1/api/RAom4OoQ8U2K6A629YRXKo9-XU-ZJM7-KZs1h11OD6c1w/find-things?type=http://www.w3.org/ns/sosa/Sample" .
+
+  sub:variant a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "the specific sequence variant this result is tied to, if the paper says so (declared via the gene-variant-phenotype template)" ;
+    nt:possibleValuesFromApi "https://w3id.org/np/l/nanopub-query-1.1/api/RAom4OoQ8U2K6A629YRXKo9-XU-ZJM7-KZs1h11OD6c1w/find-things?type=https://w3id.org/biolink/vocab/SequenceVariant" .
+
+  sub:phenotype a nt:IntroducedResource, nt:LocalResource ;
+    rdfs:label "this antibiogram observation" .
+
+  sub:phenotypeDescription a nt:LiteralPlaceholder ;
+    rdfs:label "result description (prose, e.g. \"MIC increased 8-fold vs wild-type\")" .
+
+  sub:contextSentence a nt:LiteralPlaceholder ;
+    rdfs:label "exact sentence from the paper reporting this result" .
+
+  sub:comparedTo a nt:LiteralPlaceholder ;
+    rdfs:label "compared to (the control/reference strain the result was compared against)" .
+
+  sub:antibiotic a nt:LiteralPlaceholder ;
+    rdfs:label "antibiotic or drug class tested, as named in the paper" .
+
+  sub:antibioticAroId a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "ARO (Antibiotic Resistance Ontology) term for the antibiotic, only if unambiguous" ;
+    nt:possibleValuesFromApi "https://www.ebi.ac.uk/ols4/api/select?ontology=aro&fieldList=iri,label,description&q=" .
+
+  sub:susceptibilityCall a nt:RestrictedChoicePlaceholder ;
+    rdfs:label "susceptibility call (ARO antimicrobial phenotype term)" ;
+    nt:possibleValue <http://purl.obolibrary.org/obo/ARO_3004301>,
+      <http://purl.obolibrary.org/obo/ARO_3004302>,
+      <http://purl.obolibrary.org/obo/ARO_3004300> .
+
+  sub:micValue a nt:LiteralPlaceholder ;
+    nt:hasDatatype xsd:decimal ;
+    rdfs:label "MIC numeric value" .
+
+  sub:micUnit a nt:RestrictedChoicePlaceholder ;
+    rdfs:label "MIC unit" ;
+    nt:possibleValue unit:MicroGM-PER-MilliL, unit:MilliGM-PER-L, unit:MilliGM-PER-MilliL,
+      unit:MOL-PER-L, unit:MicroMOL-PER-L .
+
+  sub:typingMethod a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "susceptibility-typing method (ARO term, e.g. disk diffusion, broth microdilution, E-test)" ;
+    nt:possibleValuesFromApi "https://www.ebi.ac.uk/ols4/api/select?ontology=aro&fieldList=iri,label,description&q=" .
+
+  sub:standard a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "breakpoint/interpretive standard used (ARO term, e.g. CLSI, EUCAST)" ;
+    nt:possibleValuesFromApi "https://www.ebi.ac.uk/ols4/api/select?ontology=aro&fieldList=iri,label,description&q=" .
+
+  sub:platform a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "named instrument/panel used for typing (ARO term, e.g. Vitek, Sensititre)" ;
+    nt:possibleValuesFromApi "https://www.ebi.ac.uk/ols4/api/select?ontology=aro&fieldList=iri,label,description&q=" .
+
+  sub:comment a nt:LiteralPlaceholder ;
+    rdfs:label "comment (only when the paper's language was genuinely ambiguous for this result)" .
+
+  # ---- labels for fixed vocabulary terms used above ----
+
+  rdf:type rdfs:label "is a" .
+  rdfs:label rdfs:label "label" .
+  rdfs:comment rdfs:label "comment" .
+  dct:description rdfs:label "description" .
+  biolink:PhenotypicFeature rdfs:label "phenotypic feature" .
+  dct:isPartOf rdfs:label "is part of" .
+  sosa:isResultOf rdfs:label "is result of" .
+  mvikg:isAssociatedWithVariant rdfs:label "is associated with variant" .
+  mvikg:comparedTo rdfs:label "compared to" .
+  mvikg:antibiotic rdfs:label "antibiotic" .
+  mvikg:antibioticAroId rdfs:label "antibiotic ARO id" .
+  mvikg:susceptibilityCall rdfs:label "susceptibility call" .
+  mvikg:micValue rdfs:label "MIC value" .
+  mvikg:micUnit rdfs:label "MIC unit" .
+  mvikg:typingMethod rdfs:label "typing method" .
+  mvikg:breakpointStandard rdfs:label "breakpoint standard" .
+  mvikg:platform rdfs:label "platform" .
+  <http://purl.obolibrary.org/obo/ARO_3004301> rdfs:label "resistant antimicrobial phenotype (R)" .
+  <http://purl.obolibrary.org/obo/ARO_3004302> rdfs:label "susceptible antimicrobial phenotype (S)" .
+  <http://purl.obolibrary.org/obo/ARO_3004300> rdfs:label "intermediate antimicrobial phenotype (I)" .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo orcid:0009-0005-5515-1230 .
+}
+
+sub:pubinfo {
+  this: dct:created "2026-11-06T12:48:58Z"^^xsd:dateTime ;
+    rdfs:label "Declaring an MVIKG antibiogram observation" ;
+    dct:creator orcid:0009-0005-5515-1230 ;
+    dct:license <https://creativecommons.org/licenses/by/4.0/> ;
+    npx:embeds sub:templateVersion ;
+    npx:introduces sub:template ;
+    nt:wasCreatedFromTemplate <https://w3id.org/np/RAgeON_vGgJCt5E4DPMi0eOPaGwNv9tbfFTRZtBwdQL0w> ;
+    nt:wasCreatedFromProvenanceTemplate <https://w3id.org/np/RA-yPZEYODCS39dWOWm7NA_ClOGFHzPi8iYhLzoZf19GI> ;
+    nt:wasCreatedFromPubinfoTemplate <https://w3id.org/np/RA4o9JqSxNO2Z47itbAcxvpVfdR97t_7usxmdR90URXQs> .
+}

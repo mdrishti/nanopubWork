@@ -1,0 +1,123 @@
+@prefix this: <http://purl.org/nanopub/temp/np001/> .
+@prefix sub: <http://purl.org/nanopub/temp/np001/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix nt: <https://w3id.org/np/o/ntemplate/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix orcid: <https://orcid.org/> .
+@prefix mvikg: <http://example.org/mvikg/> .
+@prefix biolink: <https://w3id.org/biolink/vocab/> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix gen: <https://w3id.org/kpxl/gen/terms/> .
+
+sub:Head {
+  this: a np:Nanopublication ;
+    np:hasAssertion sub:assertion ;
+    np:hasProvenance sub:provenance ;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+
+  sub:templateVersion a nt:AssertionTemplate, nt:UnlistedTemplate ;
+    dct:isVersionOf sub:template ;
+    gen:governedBy <https://w3id.org/spaces/mvikg> ;
+    rdfs:label "Declaring an MVIKG phenotype observation" ;
+    dct:description "Declaring a single phenotype observation for an MVIKG sample, optionally tied to a specific sequence variant. Split out of the gene-variant-phenotype template so that many phenotype observations can reference the same variant and/or the same sample (one variant, many phenotypes)." ;
+    nt:hasNanopubLabelPattern "phenotype: ${phenotypeDescription}" ;
+    nt:hasTag "Biology" ;
+    nt:hasTargetNanopubType biolink:PhenotypicFeature ;
+    nt:hasStatement sub:st01, sub:st02, sub:st03, sub:st04, sub:st05, sub:st06, sub:st07 .
+
+  # Statement numbering reflects display order (sample link -> governing
+  # space -> optional variant link -> phenotype type -> description ->
+  # compared-to), zero-padded for the same sorting reason documented in
+  # mvikg-variant-template-sosa.trig.
+  #
+  # Linking pattern mirrors mvikg-antibiogram-template-sosa.trig exactly:
+  # sosa:isResultOf sample is required (every phenotype observation is
+  # anchored on a sample context), mvikg:isAssociatedWithVariant variant
+  # is optional. This is what replaces the old gene->biolink:has_phenotype
+  # link that lived in mvikg-variant-template-sosa.trig -- many phenotype
+  # nanopubs can now point at the same variant and/or sample.
+  #
+  # One introduced resource only (sub:phenotype) -- no embedded resources.
+
+  # ---- sample (declared by mvikg-sample-taxon-template-sosa.trig) ----
+
+  sub:st01 rdf:subject sub:phenotype ; rdf:predicate sosa:isResultOf ; rdf:object sub:sample .
+
+  # ---- governing space (every MVIKG-introduced resource belongs to the mvikg KG) ----
+
+  sub:st02 rdf:subject sub:phenotype ; rdf:predicate dct:isPartOf ; rdf:object <https://w3id.org/spaces/mvikg/r/kg> .
+
+  # ---- optional link to a specific variant already declared elsewhere ----
+  # (object property, an already-minted sequence variant) -- grouped:
+  # all-or-nothing, same pattern as in the antibiogram template.
+
+  sub:st03 a nt:GroupedStatement, nt:OptionalStatement ;
+    nt:hasStatement sub:st04 .
+
+  sub:st04 rdf:subject sub:phenotype ; rdf:predicate mvikg:isAssociatedWithVariant ; rdf:object sub:variant .
+
+  # ---- phenotype node ----
+
+  sub:st05 rdf:subject sub:phenotype ; rdf:predicate rdf:type ; rdf:object biolink:PhenotypicFeature .
+
+  # rdfs:label on the phenotype -- a prose description of the observed
+  # phenotype. Required: also the only field feeding
+  # nt:hasNanopubLabelPattern.
+  sub:st06 rdf:subject sub:phenotype ; rdf:predicate rdfs:label ; rdf:object sub:phenotypeDescription .
+
+  sub:st07 a nt:OptionalStatement ;
+    rdf:subject sub:phenotype ; rdf:predicate mvikg:comparedTo ; rdf:object sub:comparedTo .
+
+  # ---- placeholder declarations ----
+
+  sub:sample a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "the sample this phenotype was observed in (declared via the sample-context template)" ;
+    nt:possibleValuesFromApi "https://w3id.org/np/l/nanopub-query-1.1/api/RAom4OoQ8U2K6A629YRXKo9-XU-ZJM7-KZs1h11OD6c1w/find-things?type=http://www.w3.org/ns/sosa/Sample" .
+
+  sub:variant a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "the specific sequence variant this phenotype is tied to, if known (declared via the gene-variant template)" ;
+    nt:possibleValuesFromApi "https://w3id.org/np/l/nanopub-query-1.1/api/RAom4OoQ8U2K6A629YRXKo9-XU-ZJM7-KZs1h11OD6c1w/find-things?type=https://w3id.org/biolink/vocab/SequenceVariant" .
+
+  sub:phenotype a nt:IntroducedResource, nt:LocalResource ;
+    rdfs:label "this phenotype observation" .
+
+  sub:phenotypeDescription a nt:LiteralPlaceholder ;
+    rdfs:label "phenotype description (prose, e.g. \"DeltarfaH mutant elicited ROS production...\")" .
+
+  sub:comparedTo a nt:LiteralPlaceholder ;
+    rdfs:label "compared to (the baseline/control the phenotype outcome was compared against)" .
+
+  # ---- labels for fixed vocabulary terms used above ----
+
+  rdf:type rdfs:label "is a" .
+  rdfs:label rdfs:label "label" .
+  dct:isPartOf rdfs:label "is part of" .
+  biolink:PhenotypicFeature rdfs:label "phenotypic feature" .
+  sosa:isResultOf rdfs:label "is result of" .
+  mvikg:isAssociatedWithVariant rdfs:label "is associated with variant" .
+  mvikg:comparedTo rdfs:label "compared to" .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo orcid:0009-0005-5515-1230 .
+}
+
+sub:pubinfo {
+  this: dct:created "2026-11-06T12:32:37Z"^^xsd:dateTime ;
+    rdfs:label "Declaring an MVIKG phenotype observation" ;
+    dct:creator orcid:0009-0005-5515-1230 ;
+    dct:license <https://creativecommons.org/licenses/by/4.0/> ;
+    npx:embeds sub:templateVersion ;
+    npx:introduces sub:template ;
+    nt:wasCreatedFromTemplate <https://w3id.org/np/RAgeON_vGgJCt5E4DPMi0eOPaGwNv9tbfFTRZtBwdQL0w> ;
+    nt:wasCreatedFromProvenanceTemplate <https://w3id.org/np/RA-yPZEYODCS39dWOWm7NA_ClOGFHzPi8iYhLzoZf19GI> ;
+    nt:wasCreatedFromPubinfoTemplate <https://w3id.org/np/RA4o9JqSxNO2Z47itbAcxvpVfdR97t_7usxmdR90URXQs> .
+}

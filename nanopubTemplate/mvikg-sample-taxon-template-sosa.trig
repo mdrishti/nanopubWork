@@ -1,0 +1,123 @@
+@prefix this: <http://purl.org/nanopub/temp/np001/> .
+@prefix sub: <http://purl.org/nanopub/temp/np001/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix nt: <https://w3id.org/np/o/ntemplate/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix orcid: <https://orcid.org/> .
+@prefix mvikg: <http://example.org/mvikg/> .
+@prefix biolink: <https://w3id.org/biolink/vocab/> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+@prefix gen: <https://w3id.org/kpxl/gen/terms/> .
+
+sub:Head {
+  this: a np:Nanopublication ;
+    np:hasAssertion sub:assertion ;
+    np:hasProvenance sub:provenance ;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+
+  sub:templateVersion a nt:AssertionTemplate, nt:UnlistedTemplate ;
+    dct:isVersionOf <https://w3id.org/np/RAZBvSpT-wGLuGPQHvsTxue7NL-bSGMFB-74YtSvL_XUs/template> ;
+    gen:governedBy <https://w3id.org/spaces/mvikg> ;
+    rdfs:label "Declaring an MVIKG sample context" ;
+    dct:description "Declaring an MVIKG sample context (PMC article/dataset, taxon, biome), independent of any one gene -- a sample can have many genes observed in it. To be referenced by gene-variant observations, phenotype observations, and antibiogram observations." ;
+    nt:hasNanopubLabelPattern "this sample" ;
+    nt:hasTag "Biology" ;
+    nt:hasTargetNanopubType sosa:Sample ;
+    nt:hasStatement sub:st01, sub:st02, sub:st03, sub:st04, sub:st05, sub:st06, sub:st07 .
+
+  # Statement numbering reflects display order (sample -> PMC project ->
+  # taxon -> biome). Zero-padded for the same sorting reason documented in
+  # mvikg-variant-template-sosa.trig.
+  #
+  # Deliberately no gene link here: a sample is observed for many genes
+  # (one sample, many gene-variant / phenotype / antibiogram nanopubs
+  # referencing it via their own sub:sample lookup field), so tying the
+  # sample to one gene at declaration time would be wrong.
+  #
+  # No embedded strain/organism node: the strain/organism layer carried no
+  # data of its own beyond pointing at the taxon, so the sample links
+  # straight to its taxon (one introduced resource per template -- see
+  # the variant and phenotype templates for the same rule).
+
+  # ---- sample, typed so gene-variant/phenotype/antibiogram templates can look it up ----
+
+  sub:st01 rdf:subject sub:sample ; rdf:predicate rdf:type ; rdf:object sosa:Sample .
+
+  # ---- governing space (every MVIKG-introduced resource belongs to the mvikg KG) ----
+
+  sub:st02 rdf:subject sub:sample ; rdf:predicate dct:isPartOf ; rdf:object <https://w3id.org/spaces/mvikg/r/kg> .
+
+  # ---- PMC article/dataset ----
+  # biolink:mentions (object property, the PMC article/dataset that
+  # mentions this sample) -- grouped: all-or-nothing. Direction is
+  # paper -> sample (the paper mentions the sample), not
+  # dcterms:isPartOf sample -> paper as before.
+
+  sub:st03 a nt:GroupedStatement, nt:OptionalStatement ;
+    nt:hasStatement sub:st04, sub:st05 .
+
+  sub:st04 rdf:subject sub:project ;
+  rdf:predicate biolink:mentions ;
+  rdf:object sub:sample .
+  sub:st05 rdf:subject sub:project ; rdf:predicate rdf:type ; rdf:object dcmitype:Dataset .
+
+  # ---- taxon, biome ----
+
+  sub:st06 rdf:subject sub:sample ; rdf:predicate biolink:in_taxon ; rdf:object sub:taxon .
+
+  sub:st07 a nt:OptionalStatement ;
+    rdf:subject sub:taxon ; rdf:predicate mvikg:has_biome ; rdf:object sub:biome .
+
+  # ---- placeholder declarations ----
+
+  sub:sample a nt:IntroducedResource, nt:LocalResource ;
+    rdfs:label "this sample" .
+
+  sub:taxon a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "the organism taxon the sample belongs to (NCBITaxon)" ;
+    nt:possibleValuesFromApi "https://www.ebi.ac.uk/ols/api/select?ontology=ncbitaxon&fieldList=iri,label,description&q=" .
+
+  sub:biome a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "the biome the taxon was sampled from (GOLD biome recommended)" ;
+    nt:possibleValuesFromApi "https://www.ebi.ac.uk/ols4/api/select?ontology=gold&fieldList=iri,label,description&q=" .
+
+  sub:project a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "the PMC article/dataset that mentions this sample (search by title, PMC ID or PMID)" ;
+    nt:possibleValuesFromApi "https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&query=" .
+
+  # ---- labels for fixed vocabulary terms used above ----
+
+  rdf:type rdfs:label "is a" .
+  biolink:in_taxon rdfs:label "in taxon" .
+  biolink:mentions rdfs:label "mentions" .
+  mvikg:has_biome rdfs:label "has biome" .
+  sosa:Sample rdfs:label "sample" .
+  dct:isPartOf rdfs:label "is part of" .
+  dcmitype:Dataset rdfs:label "dataset" .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo orcid:0009-0005-5515-1230 .
+}
+
+sub:pubinfo {
+  this: dct:created "2026-11-07T20:21:25Z"^^xsd:dateTime ;
+    rdfs:label "Declaring an MVIKG sample context" ;
+    dct:creator orcid:0009-0005-5515-1230 ;
+    dct:license <https://creativecommons.org/licenses/by/4.0/> ;
+    npx:embeds sub:templateVersion ;
+    npx:introduces <https://w3id.org/np/RAZBvSpT-wGLuGPQHvsTxue7NL-bSGMFB-74YtSvL_XUs/template> ;
+    npx:supersedes <https://w3id.org/np/RA_NDDx6ZeyCNCNhGxlFShlKPswjIbGzvGzqwOaUCLw5A> ;
+    nt:wasCreatedFromTemplate <https://w3id.org/np/RAgeON_vGgJCt5E4DPMi0eOPaGwNv9tbfFTRZtBwdQL0w> ;
+    nt:wasCreatedFromProvenanceTemplate <https://w3id.org/np/RA-yPZEYODCS39dWOWm7NA_ClOGFHzPi8iYhLzoZf19GI> ;
+    nt:wasCreatedFromPubinfoTemplate <https://w3id.org/np/RA4o9JqSxNO2Z47itbAcxvpVfdR97t_7usxmdR90URXQs> .
+}

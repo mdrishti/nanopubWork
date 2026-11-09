@@ -11,10 +11,9 @@
 @prefix orcid: <https://orcid.org/> .
 @prefix mvikg: <http://example.org/mvikg/> .
 @prefix biolink: <https://w3id.org/biolink/vocab/> .
-@prefix qudt: <http://qudt.org/schema/qudt/> .
 @prefix unit: <http://qudt.org/vocab/unit/> .
 @prefix sosa: <http://www.w3.org/ns/sosa/> .
-@prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+@prefix gen: <https://w3id.org/kpxl/gen/terms/> .
 
 sub:Head {
   this: a np:Nanopublication ;
@@ -25,47 +24,54 @@ sub:Head {
 
 sub:assertion {
 
-  sub:assertion a nt:AssertionTemplate, nt:UnlistedTemplate ;
-    rdfs:label "Declaring an MVIKG gene-variant observation (sosa links)" ;
-    dct:description "Declaring an MVIKG gene-variant observation";
+  sub:templateVersion a nt:AssertionTemplate, nt:UnlistedTemplate ;
+    dct:isVersionOf <https://w3id.org/np/RATaU30_DTYcbG3bqZQb4fLRktnxKyjASwI5fFFIumAeo/template> ;
+    gen:governedBy <https://w3id.org/spaces/mvikg> ;
+    rdfs:label "Declaring an MVIKG observation" ;
+    dct:description "Declaring an MVIKG observation";
     nt:hasNanopubLabelPattern "${variantName}" ;
     nt:hasTag "Biology" ;
     nt:hasTargetNanopubType biolink:SequenceVariant ;
-    nt:hasStatement sub:st01, sub:st02, sub:st03, sub:st04, sub:st05, sub:st06, sub:st07, sub:st08,
+    nt:hasStatement sub:st01, sub:st02, sub:st08,
       sub:st09, sub:st10, sub:st11, sub:st12, sub:st13, sub:st14, sub:st15, sub:st16, sub:st17,
-      sub:st18, sub:st19, sub:st20, sub:st21, sub:st22, sub:st23, sub:st24, sub:st25, sub:st26,
-      sub:st27, sub:st28, sub:st29, sub:st30, sub:st31, sub:st32 .
+      sub:st18, sub:st19, sub:st20, sub:st23, sub:st24 .
 
-  # Statement numbering reflects display order (PMC+sample -> strain/taxon
-  # -> gene -> variant -> variant properties -> phenotype), NOT insertion
-  # history. Numbers are zero-padded on purpose: Nanodash lists statements
-  # in the sorted order of their node IRIs, and signing re-serializes the
-  # assertion in sorted order too (the same gotcha documented for
-  # gen:hasViewAction), so unpadded st1/st2/.../st10/... would not sort in
-  # numeric order. Renumber (and reorder the hasStatement list and these
-  # blocks) together if you ever reorder fields again.
+  # Statement numbering reflects display order (sample -> gene -> variant ->
+  # variant properties), NOT insertion history. Numbers are zero-padded on
+  # purpose: Nanodash lists statements in the sorted order of their node
+  # IRIs, and signing re-serializes the assertion in sorted order too (the
+  # same gotcha documented for gen:hasViewAction), so unpadded
+  # st1/st2/.../st10/... would not sort in numeric order. Renumber (and
+  # reorder the hasStatement list and these blocks) together if you ever
+  # reorder fields again. Numbers are kept non-contiguous on purpose where
+  # statements were removed in this version (phenotype, frequency/evidence
+  # object-property nodes), so the diff against the superseded version
+  # stays legible -- st03-07, st21-22, st27-32 are retired, not reused.
+  #
+  # st02-st07 (sample/organism/taxon/biome/PMC-project) were split out into
+  # a separate template, mvikg-sample-taxon-template-sosa.trig: this
+  # template now only *references* an already-declared sample node via the
+  # sub:sample lookup placeholder below, instead of minting one.
+  #
+  # Phenotype was split out into its own template,
+  # mvikg-phenotype-template-sosa.trig, so that many phenotype
+  # observations can reference the same variant and/or sample. See that
+  # template for the biolink:has_phenotype replacement
+  # (mvikg:isAssociatedWithVariant / sosa:isResultOf).
+  #
+  # Frequency and evidence no longer mint their own embedded
+  # qudt:QuantityValue / ECO nodes -- this template introduces exactly one
+  # resource (sub:variant), per the one-introduced-resource-per-template
+  # rule now applied across all MVIKG templates. Both are flattened to
+  # direct literal properties on sub:variant.
 
-  # ---- PMC article/dataset + sample ----
+  # ---- sample (declared by mvikg-sample-taxon-template-sosa.trig) ----
 
   sub:st01 rdf:subject sub:gene ; rdf:predicate sosa:isFeatureOfInterestOf ; rdf:object sub:sample .
 
-  # dcterms:isPartOf (object property, the sample's source PMC article/dataset)
-  # — grouped: all-or-nothing. This is the whole point of this template
-  # variant: the sample node is what carries PMC provenance in the real
-  # builder's output, and the flat template has no sample node to hang it on.
-  sub:st02 a nt:GroupedStatement, nt:OptionalStatement ;
-    nt:hasStatement sub:st03, sub:st04 .
+  # ---- governing space (every MVIKG-introduced resource belongs to the mvikg KG) ----
 
-  sub:st03 rdf:subject sub:sample ; rdf:predicate dct:isPartOf ; rdf:object sub:project .
-  sub:st04 rdf:subject sub:project ; rdf:predicate rdf:type ; rdf:object dcmitype:Dataset .
-
-  # ---- strain/organism, taxon, biome ----
-
-  sub:st05 rdf:subject sub:sample ; rdf:predicate sosa:isSampleOf ; rdf:object sub:organism .
-  sub:st06 rdf:subject sub:organism ; rdf:predicate biolink:in_taxon ; rdf:object sub:taxon .
-
-  sub:st07 a nt:OptionalStatement ;
-    rdf:subject sub:taxon ; rdf:predicate mvikg:has_biome ; rdf:object sub:biome .
+  sub:st02 rdf:subject sub:variant ; rdf:predicate dct:isPartOf ; rdf:object <https://w3id.org/spaces/mvikg/r/kg> .
 
   # ---- gene ----
 
@@ -103,58 +109,39 @@ sub:assertion {
   sub:st18 a nt:OptionalStatement ;
     rdf:subject sub:variant ; rdf:predicate biolink:end_coordinate ; rdf:object sub:endCoordinate .
 
-  # biolink:has_evidence (object property, nested ECO evidence node) -- grouped: all-or-nothing
-  sub:st19 a nt:GroupedStatement, nt:OptionalStatement ;
-    nt:hasStatement sub:st20, sub:st21, sub:st22 .
+  # evidence text -- flattened from the dropped embedded ECO evidence node
+  # (rdf:type ECO_0000305 + dct:description) to a single literal directly
+  # on the variant.
+  sub:st19 a nt:OptionalStatement ;
+    rdf:subject sub:variant ; rdf:predicate mvikg:evidenceText ; rdf:object sub:evidenceText .
 
-  sub:st20 rdf:subject sub:variant ; rdf:predicate biolink:has_evidence ; rdf:object sub:evidence .
-  sub:st21 rdf:subject sub:evidence ; rdf:predicate rdf:type ; rdf:object <http://purl.obolibrary.org/obo/ECO_0000305> .
-  sub:st22 rdf:subject sub:evidence ; rdf:predicate dct:description ; rdf:object sub:evidenceText .
+  # mvikg:frequencyValue + mvikg:frequencyUnit -- flat literal/IRI
+  # properties directly on sub:variant (no intermediate quantity node:
+  # this template introduces exactly one resource). Kept grouped:
+  # all-or-nothing, since a bare value with no unit (or vice versa) is not
+  # meaningful.
+  sub:st20 a nt:GroupedStatement, nt:OptionalStatement ;
+    nt:hasStatement sub:st23, sub:st24 .
 
-  # mvikg:frequency (object property, nested qudt:QuantityValue) — grouped: all-or-nothing
-  sub:st23 a nt:GroupedStatement, nt:OptionalStatement ;
-    nt:hasStatement sub:st24, sub:st25, sub:st26, sub:st27 .
+  sub:st23 rdf:subject sub:variant ; rdf:predicate mvikg:frequencyValue ; rdf:object sub:freqValue .
+  sub:st24 rdf:subject sub:variant ; rdf:predicate mvikg:frequencyUnit ; rdf:object sub:freqUnit .
 
-  sub:st24 rdf:subject sub:variant ; rdf:predicate mvikg:frequency ; rdf:object sub:freq .
-  sub:st25 rdf:subject sub:freq ; rdf:predicate rdf:type ; rdf:object qudt:QuantityValue .
-  sub:st26 rdf:subject sub:freq ; rdf:predicate qudt:numericValue ; rdf:object sub:freqValue .
-  sub:st27 rdf:subject sub:freq ; rdf:predicate qudt:hasUnit ; rdf:object sub:freqUnit .
-
-  # ---- phenotype ----
-  # mvikg:comparedTo (data property, on a phenotype associated with the gene) — grouped: all-or-nothing
-  sub:st28 a nt:GroupedStatement, nt:OptionalStatement ;
-    nt:hasStatement sub:st29, sub:st30, sub:st31, sub:st32 .
-
-  sub:st29 rdf:subject sub:gene ; rdf:predicate biolink:has_phenotype ; rdf:object sub:phenotype .
-  sub:st30 rdf:subject sub:phenotype ; rdf:predicate rdf:type ; rdf:object biolink:PhenotypicFeature .
-
-  # rdfs:label on the phenotype itself -- a prose description, not an
-  # opaque minted identifier. Non-optional *within* the group.
-  sub:st31 rdf:subject sub:phenotype ; rdf:predicate rdfs:label ; rdf:object sub:phenotypeDescription .
-
-  sub:st32 rdf:subject sub:phenotype ; rdf:predicate mvikg:comparedTo ; rdf:object sub:comparedTo .
+  # ---- relocated to mvikg-phenotype-template-sosa.trig: biolink:has_phenotype,
+  # the phenotype node, its rdfs:label and mvikg:comparedTo ----
 
   # ---- placeholder declarations ----
 
-  sub:gene a nt:AgentPlaceholder, nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
-    rdfs:label "the gene this variant and (optionally) phenotype belong to" ;
-    nt:possibleValuesFromApi "https://w3id.org/np/l/nanopub-query-1.1/api/RAom4OoQ8U2K6A629YRXKo9-XU-ZJM7-KZs1h11OD6c1w/find-things?type=https://w3id.org/biolink/vocab/Gene" .
+  sub:gene a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "the gene this variant belongs to (search existing genes, or enter an NCBI Gene ID)" ;
+    nt:possibleValuesFromApi "https://w3id.org/np/l/nanopub-query-1.1/api/RAom4OoQ8U2K6A629YRXKo9-XU-ZJM7-KZs1h11OD6c1w/find-things?type=https://w3id.org/biolink/vocab/Gene",
+      "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=gene&retmode=json&id=" .
 
-  sub:sample a nt:EmbeddedResource, nt:LocalResource ;
-    rdfs:label "the sample this gene was observed in" .
-
-  sub:organism a nt:EmbeddedResource, nt:LocalResource ;
-    rdfs:label "the strain/organism this sample was taken from" .
-
-  sub:taxon a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
-    rdfs:label "the organism taxon the strain belongs to (NCBITaxon)" ;
-    nt:possibleValuesFromApi "https://www.ebi.ac.uk/ols/api/select?ontology=ncbitaxon&fieldList=iri,label,description&q=" .
+  sub:sample a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
+    rdfs:label "the sample this gene was observed in (declared via the sample-context template)" ;
+    nt:possibleValuesFromApi "https://w3id.org/np/l/nanopub-query-1.1/api/RAom4OoQ8U2K6A629YRXKo9-XU-ZJM7-KZs1h11OD6c1w/find-things?type=http://www.w3.org/ns/sosa/Sample" .
 
   sub:variant a nt:IntroducedResource, nt:LocalResource ;
     rdfs:label "this sequence variant" .
-
-  sub:freq a nt:EmbeddedResource, nt:LocalResource ;
-    rdfs:label "the variant's frequency" .
 
   sub:freqValue a nt:LiteralPlaceholder ;
     nt:hasDatatype xsd:decimal ;
@@ -164,21 +151,8 @@ sub:assertion {
     nt:possibleValue unit:PERCENT, unit:UNITLESS ;
     rdfs:label "frequency unit" .
 
-  sub:biome a nt:ExternalUriPlaceholder, nt:GuidedChoicePlaceholder ;
-    rdfs:label "the biome the taxon was sampled from (GOLD biome recommended)" ;
-    nt:possibleValuesFromApi "https://www.ebi.ac.uk/ols4/api/select?ontology=gold&fieldList=iri,label,description&q=" .
-
   sub:alt a nt:LiteralPlaceholder ;
     rdfs:label "alternate allele" .
-
-  sub:phenotype a nt:EmbeddedResource, nt:LocalResource ;
-    rdfs:label "the phenotype associated with this gene" .
-
-  sub:comparedTo a nt:LiteralPlaceholder ;
-    rdfs:label "compared to (the baseline/control the phenotype outcome was compared against)" .
-
-  sub:phenotypeDescription a nt:LiteralPlaceholder ;
-    rdfs:label "phenotype description (prose, e.g. \"DeltarfaH mutant elicited ROS production...\")" .
 
   sub:effect a nt:LiteralPlaceholder ;
     rdfs:label "variant effect" .
@@ -204,55 +178,41 @@ sub:assertion {
     nt:hasDatatype xsd:integer ;
     rdfs:label "end coordinate (variant position)" .
 
-  sub:evidence a nt:EmbeddedResource, nt:LocalResource ;
-    rdfs:label "evidence for this variant" .
-
   sub:evidenceText a nt:LiteralPlaceholder ;
     rdfs:label "evidence text (quote/description from the source)" .
-
-  sub:project a nt:ExternalUriPlaceholder ;
-    rdfs:label "the PMC article/dataset this record is derived from (PMC URI, e.g. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3079231/)" .
 
   # ---- labels for fixed vocabulary terms used above ----
 
   rdf:type rdfs:label "is a" .
   biolink:has_sequence_variant rdfs:label "has sequence variant" .
-  biolink:in_taxon rdfs:label "in taxon" .
-  biolink:has_phenotype rdfs:label "has phenotype" .
   biolink:SequenceVariant rdfs:label "sequence variant" .
   biolink:Gene rdfs:label "gene" .
-  biolink:PhenotypicFeature rdfs:label "phenotypic feature" .
-  mvikg:frequency rdfs:label "frequency" .
-  mvikg:has_biome rdfs:label "has biome" .
+  mvikg:frequencyValue rdfs:label "frequency value" .
+  mvikg:frequencyUnit rdfs:label "frequency unit" .
   mvikg:alt rdfs:label "alternate allele" .
-  mvikg:comparedTo rdfs:label "compared to" .
   mvikg:effect rdfs:label "variant effect" .
   mvikg:length rdfs:label "variant length" .
   mvikg:ref rdfs:label "reference allele" .
-  qudt:QuantityValue rdfs:label "quantity value" .
-  qudt:numericValue rdfs:label "numeric value" .
-  qudt:hasUnit rdfs:label "unit" .
+  mvikg:evidenceText rdfs:label "evidence text" .
   rdfs:label rdfs:label "label" .
   biolink:start_coordinate rdfs:label "start coordinate" .
   biolink:end_coordinate rdfs:label "end coordinate" .
-  biolink:has_evidence rdfs:label "has evidence" .
-  dct:description rdfs:label "description" .
-  <http://purl.obolibrary.org/obo/ECO_0000305> rdfs:label "evidence" .
-  sosa:isFeatureOfInterestOf rdfs:label "is feature of interest of" .
-  sosa:isSampleOf rdfs:label "is sample of" .
   dct:isPartOf rdfs:label "is part of" .
-  dcmitype:Dataset rdfs:label "dataset" .
+  sosa:isFeatureOfInterestOf rdfs:label "is feature of interest of" .
 }
 
 sub:provenance {
-  sub:assertion prov:wasAttributedTo orcid:0000-0000-0000-0000 .
+  sub:assertion prov:wasAttributedTo orcid:0009-0005-5515-1230 .
 }
 
 sub:pubinfo {
-  this: dct:created "2026-11-03T13:45:00Z"^^xsd:dateTime ;
-    rdfs:label "Declaring an MVIKG gene-variant observation (sosa links)" ;
-    dct:creator orcid:0000-0000-0000-0000 ;
+  this: dct:created "2026-11-06T12:48:58Z"^^xsd:dateTime ;
+    rdfs:label "Declaring an MVIKG observation" ;
+    dct:creator orcid:0009-0005-5515-1230 ;
     dct:license <https://creativecommons.org/licenses/by/4.0/> ;
+    npx:embeds sub:templateVersion ;
+    npx:introduces <https://w3id.org/np/RATaU30_DTYcbG3bqZQb4fLRktnxKyjASwI5fFFIumAeo/template> ;
+    npx:supersedes <https://w3id.org/np/RATaU30_DTYcbG3bqZQb4fLRktnxKyjASwI5fFFIumAeo> ;
     nt:wasCreatedFromTemplate <https://w3id.org/np/RAgeON_vGgJCt5E4DPMi0eOPaGwNv9tbfFTRZtBwdQL0w> ;
     nt:wasCreatedFromProvenanceTemplate <https://w3id.org/np/RA-yPZEYODCS39dWOWm7NA_ClOGFHzPi8iYhLzoZf19GI> ;
     nt:wasCreatedFromPubinfoTemplate <https://w3id.org/np/RA4o9JqSxNO2Z47itbAcxvpVfdR97t_7usxmdR90URXQs> .
