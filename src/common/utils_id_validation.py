@@ -32,6 +32,9 @@ _taxon_id_cache: dict = {}       # taxon_id_str -> fetched_name | None
 _gene_id_cache: dict = {}        # gene_id_str -> (official_symbol, aliases) | None
 _uniprot_acc_cache: dict = {}    # accession -> fetched_gene_symbols (list) | None
 _assembly_acc_cache: dict = {}   # accession -> fetched_taxid | None
+_pmc_id_cache: dict = {}         # pmc_id_str -> fetched_title | None
+
+EUROPEPMC_SEARCH_URL = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
 
 
 def _names_roughly_match(claimed: str, fetched: str) -> bool:
@@ -188,6 +191,58 @@ def validate_uniprot_accession(accession: str, claimed_symbol: str | None,
     if fetched_symbols and _best_fuzzy_symbol_match(claimed_symbol, fetched_symbols):
         return {'status': 'validated', 'fetched_symbols': fetched_symbols}
     return {'status': 'mismatch', 'fetched_symbols': fetched_symbols}
+
+
+def validate_pmc_id(pmc_id: str, log_file: str = "ncbi-lookup.log") -> dict:
+    """
+    Confirm a submitter-supplied PMC ID (e.g. 'PMC1913268') exists in
+    EuropePMC.
+
+    No claimed-name cross-check: unlike taxon/gene/accession, there is no
+    submitter-supplied title to compare against, so this only confirms
+    existence. Do NOT filter the query with 'AND SRC:PMC' — SRC:PMC selects
+    records whose primary source-of-record is PMC itself (preprints etc.),
+    while most MEDLINE-indexed papers that also have a PMC full-text copy
+    are tagged SRC:MED and would be wrongly excluded (verified against
+    PMC1913268, a MED-sourced paper with a valid pmcid).
+
+    Returns {'status': 'validated'|'not_found', 'fetched_title': str|None}.
+    """
+    pmc_id = pmc_id.strip().upper()
+    if not pmc_id.startswith('PMC') or not pmc_id[3:].isdigit():
+        return {'status': 'not_found', 'fetched_title': None}
+
+    if pmc_id in _pmc_id_cache:
+        fetched_title = _pmc_id_cache[pmc_id]
+    else:
+        fetched_title = None
+        query = urllib.parse.quote(f"pmcid:{pmc_id}")
+        url = f"{EUROPEPMC_SEARCH_URL}?query={query}&format=json"
+
+        def _do_fetch():
+            print_to_log(f"EuropePMC API call: GET {url}", log_file)
+            req = urllib.request.Request(url, headers={'Accept': 'application/json'})
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                return json.loads(resp.read())
+
+        try:
+            data = _call_with_network_retry(_do_fetch, log_file, f"pmc_validate:{pmc_id}")
+            results = data.get('resultList', {}).get('result', []) if data else []
+            if results:
+                fetched_title = results[0].get('title') or None
+        except GeneResolutionNetworkError:
+            raise
+        except Exception as e:
+            print_to_log(f"EuropePMC validation failed for '{pmc_id}': {e}", log_file)
+            fetched_title = None
+
+        _pmc_id_cache[pmc_id] = fetched_title
+        if fetched_title:
+            print_to_log(f"EuropePMC validate: {pmc_id} -> '{fetched_title}'", log_file)
+
+    if fetched_title is None:
+        return {'status': 'not_found', 'fetched_title': None}
+    return {'status': 'validated', 'fetched_title': fetched_title}
 
 
 def validate_genome_accession(accession: str, claimed_taxon_id: str | None = None,
