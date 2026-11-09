@@ -44,3 +44,6 @@ nanopub-1.95.1-jar-with-dependencies.jar
 
 # other files
 */preview-*
+*signed.trig
+*/*signed.trig
+*/*/*signed.trig
