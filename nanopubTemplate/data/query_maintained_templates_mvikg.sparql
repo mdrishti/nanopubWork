@@ -1,0 +1,120 @@
+# List templates (assertion/provenance/pubinfo) maintained by a space, with the
+# resolved current version of each.
+#
+# Base query: "List maintained templates of a space"
+# (RAnIcGmT13ZyCOK2MtxWBpN1LkG7LX0Y3wwJEEOU4qcWM),
+# https://w3id.org/np/RAnIcGmT13ZyCOK2MtxWBpN1LkG7LX0Y3wwJEEOU4qcWM
+# Modified from the published template to also project ?currentVersion -- the
+# resolved current version's own embedded IRI (e.g. .../templateVersion) -- and
+# to rename the variable to ?currentVersion for consistency with the view-displays
+# query (query_view_displays_mvikg_kg.sparql).
+#
+# ?resource is the version-independent template IRI (the "kind"); ?currentVersion
+# is the specific version currently in effect, resolved as the newest
+# non-invalidated version signed by a current member+ (admin/maintainer/member)
+# of the governing space -- for templates already listed as maintained resources
+# of the space -- or by a current member+ of the space, for governed-but-not-yet-
+# listed templates (?status = "not listed yet" rows, register_* columns filled in).
+# ?np is the defining nanopub's URI.
+#
+# Space is hardcoded below to https://w3id.org/spaces/mvikg -- replace the VALUES
+# line to query a different space.
+#
+# Run via POST (the query is too large for a GET request's header limit):
+#   curl -s -X POST "https://query.knowledgepixels.com/repo/full" \
+#     --data-urlencode "query@query_maintained_templates_mvikg.sparql" \
+#     -H "Accept: text/csv"
+#
+# Or, to use the published (unmodified) template directly via its API
+# (no ?currentVersion column):
+#   curl -s "https://query.knowledgepixels.com/api/RAnIcGmT13ZyCOK2MtxWBpN1LkG7LX0Y3wwJEEOU4qcWM/list-maintained-templates?space=<url-encoded-space-iri>" \
+#     -H "Accept: text/csv"
+
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix dct: <http://purl.org/dc/terms/>
+prefix np: <http://www.nanopub.org/nschema#>
+prefix npa: <http://purl.org/nanopub/admin/>
+prefix npx: <http://purl.org/nanopub/x/>
+prefix nt: <https://w3id.org/np/o/ntemplate/>
+prefix gen: <https://w3id.org/kpxl/gen/terms/>
+
+select ?resource ?resource_label ?type ?status ?currentVersion ?register_kind ?register_label ?register_description ?register_type ?np ("^" as ?np_label) where {
+  {
+    select ?resource ?registered ?np ?currentVersion (min(str(?templateType)) as ?typeIri) (coalesce(min(if(lang(?label) = "", ?label, ?nolabel)), min(?label)) as ?resource_label) (coalesce(min(if(lang(?desc) = "", ?desc, ?nodesc)), min(?desc)) as ?description) where {
+      {
+        select ?resource ?registered (max(concat(str(?gDate), ">", str(?gNp))) as ?maxW) where {
+          {
+            values ?_space_multi_iri { <https://w3id.org/spaces/mvikg> }
+            graph npa:graph {
+              ?gNp npa:hasValidSignatureForPublicKeyHash ?gPubkeyhash ;
+                   dct:created ?gDate ;
+                   npx:embeds ?gVersion ;
+                   np:hasAssertion ?gA .
+              filter not exists { ?gInv npx:invalidates ?gNp ; npa:hasValidSignatureForPublicKeyHash ?gPubkeyhash . }
+            }
+            graph ?gA { ?gVersion a ?gType ; dct:isVersionOf ?resource ; gen:governedBy ?_space_multi_iri .
+                        filter(?gType in (nt:AssertionTemplate, nt:ProvenanceTemplate, nt:PubinfoTemplate)) }
+            service <https://w3id.org/np/l/nanopub-query-1.1/repo/spaces> {
+              graph npa:graph { npa:thisRepo npa:hasCurrentSpaceState ?stateG . }
+              graph ?stateG {
+                ?resource npa:isMaintainedBy ?_space_multi_iri ; npa:hasGoverningSpaceRef ?gRef .
+                ?gRi a gen:RoleInstantiation ; npa:forSpace ?_space_multi_iri ; npa:forSpaceRef ?gRef ;
+                     npa:hasRoleType ?gTier ; npa:forAgent ?gAgent .
+                filter(?gTier = gen:AdminRole || ?gTier = gen:MaintainerRole || ?gTier = gen:MemberRole)
+                ?gAcct a npa:AccountState ; npa:agent ?gAgent ; npa:pubkey ?gPubkeyhash .
+              }
+            }
+            bind(true as ?registered)
+          } union {
+            {
+              select (concat(" ", group_concat(distinct str(?uKey); separator=" "), " ") as ?uKeys)
+                     (concat(" ", group_concat(distinct str(?uKind); separator=" "), " ") as ?uKinds) where {
+                values ?_space_multi_iri { <https://w3id.org/spaces/mvikg> }
+                service <https://w3id.org/np/l/nanopub-query-1.1/repo/spaces> {
+                  graph npa:graph { npa:thisRepo npa:hasCurrentSpaceState ?uState . }
+                  graph ?uState {
+                    ?uRi a gen:RoleInstantiation ; npa:forSpace ?_space_multi_iri ; npa:hasRoleType ?uTier ; npa:forAgent ?uAgent .
+                    filter(?uTier = gen:AdminRole || ?uTier = gen:MaintainerRole || ?uTier = gen:MemberRole)
+                    ?uAcct a npa:AccountState ; npa:agent ?uAgent ; npa:pubkey ?uKey .
+                  }
+                  optional { graph ?uState { ?uKind npa:isMaintainedBy ?_space_multi_iri . } }
+                }
+              }
+            }
+            values ?_space_multi_iri { <https://w3id.org/spaces/mvikg> }
+            graph npa:graph {
+              ?gNp npa:hasValidSignatureForPublicKeyHash ?gPubkeyhash ;
+                   dct:created ?gDate ;
+                   npx:embeds ?gVersion ;
+                   np:hasAssertion ?gA .
+              filter not exists { ?gInv npx:invalidates ?gNp ; npa:hasValidSignatureForPublicKeyHash ?gPubkeyhash . }
+            }
+            graph ?gA { ?gVersion a ?gType ; dct:isVersionOf ?resource ; gen:governedBy ?_space_multi_iri .
+                        filter(?gType in (nt:AssertionTemplate, nt:ProvenanceTemplate, nt:PubinfoTemplate)) }
+            filter(contains(?uKeys, concat(" ", str(?gPubkeyhash), " ")))
+            filter(!contains(?uKinds, concat(" ", str(?resource), " ")))
+            bind(false as ?registered)
+          }
+        } group by ?resource ?registered
+      }
+      graph npa:graph {
+        ?np npa:hasValidSignatureForPublicKeyHash ?pubkeyhash ;
+            dct:created ?date ;
+            npx:embeds ?currentVersion ;
+            np:hasAssertion ?a .
+      }
+      filter(concat(str(?date), ">", str(?np)) = ?maxW)
+      graph ?a { ?currentVersion a ?templateType ; dct:isVersionOf ?resource .
+                 filter(?templateType in (nt:AssertionTemplate, nt:ProvenanceTemplate, nt:PubinfoTemplate)) }
+      optional { graph ?a { ?currentVersion rdfs:label ?label } }
+      optional { graph ?a { ?currentVersion dct:description ?desc } }
+    } group by ?resource ?registered ?np ?currentVersion
+  }
+  bind(if(?typeIri = str(nt:ProvenanceTemplate), "provenance",
+       if(?typeIri = str(nt:PubinfoTemplate), "publication info", "assertion")) as ?type)
+  bind(if(?registered, "", "⏳ not listed yet") as ?status)
+  bind(if(?registered, "", str(?resource)) as ?register_kind)
+  bind(if(?registered, "", ?resource_label) as ?register_label)
+  bind(if(?registered, "", coalesce(?description, ?resource_label)) as ?register_description)
+  bind(if(?registered, "", ?typeIri) as ?register_type)
+} order by ?registered lcase(str(?resource_label))

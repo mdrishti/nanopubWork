@@ -1,0 +1,156 @@
+# Get view displays for a resource, with the resolved current version of each view.
+#
+# Base query: "Get view displays" (RAvPNGogj0GqBiBYBxqvympNd_RHXoxMHKs19bBymAelo),
+# https://w3id.org/np/RAvPNGogj0GqBiBYBxqvympNd_RHXoxMHKs19bBymAelo
+# Modified from the published template to:
+#   - rename the ?view output column to ?currentVersion for consistency with the
+#     templates query (query_maintained_templates_mvikg.sparql)
+#   - add ?viewUpdated: the resolved current version's own dct:created timestamp
+#     (when the VIEW DEFINITION was last published/superseded), distinct from
+#     ?date (when the DISPLAY/ASSIGNMENT linking it to this resource was published)
+#
+# Each referenced view is already resolved server-side to its latest non-retracted
+# version (following npx:supersedes, or gen:governedBy space resolution where
+# applicable) -- no extra latest-version lookup is needed on the client side.
+#
+# To collapse to only the currently active views, group rows by ?viewKind and keep
+# the row with the max ?date per group; keep only rows where
+# ?displayMode = gen:ActivatedViewDisplay.
+#
+# Resource is hardcoded below to https://w3id.org/spaces/mvikg/r/kg -- replace the
+# VALUES line to query a different resource.
+#
+# Run via POST (the query is too large for a GET request's header limit):
+#   curl -s -X POST "https://query.knowledgepixels.com/repo/full" \
+#     --data-urlencode "query@query_view_displays_mvikg_kg.sparql" \
+#     -H "Accept: text/csv"
+#
+# Or, to use the published (unmodified) template directly via its API:
+#   curl -s "https://query.knowledgepixels.com/api/RAvPNGogj0GqBiBYBxqvympNd_RHXoxMHKs19bBymAelo/get-view-displays?resource=<url-encoded-resource-iri>" \
+#     -H "Accept: text/csv"
+
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix dct:  <http://purl.org/dc/terms/>
+prefix np:   <http://www.nanopub.org/nschema#>
+prefix npa:  <http://purl.org/nanopub/admin/>
+prefix npx:  <http://purl.org/nanopub/x/>
+prefix gen:  <https://w3id.org/kpxl/gen/terms/>
+
+select distinct ?display ?currentVersion (coalesce(?viewKindOptional, ?currentVersion) as ?viewKind) ?presetKind
+                ?label ?displayType ?displayMode ?np ?pubkey ?date
+                (concat(substr(str(coalesce(?ldate, ?date)),1,19), "Z") as ?viewUpdated) where {
+  values ?_resource_multi_iri { <https://w3id.org/spaces/mvikg/r/kg> }
+  {
+    select (concat("|", group_concat(concat(str(?wKind), ">", str(?wSpace), ">", str(?wLatest)); separator="|"), "|") as ?govWinners) where {
+      select ?wKind ?wSpace (iri(strafter(max(concat(str(?cDate), ">", str(?cver))), ">")) as ?wLatest) where {
+        { select ?wKind ?wSpace ?cver ?cpk ?cDate where {
+          graph npa:graph {
+            ?cnp dct:created ?cDate ; npa:hasValidSignatureForPublicKeyHash ?cpk ; npx:embeds ?cver ; np:hasAssertion ?ca .
+            filter not exists { ?ci npx:invalidates ?cnp ; npa:hasValidSignatureForPublicKeyHash ?cpk . }
+          }
+          graph ?ca { ?cver dct:isVersionOf ?wKind ; gen:governedBy ?wSpace . }
+        } }
+        service <https://w3id.org/np/l/nanopub-query-1.1/repo/spaces> {
+          graph npa:graph { <http://purl.org/nanopub/admin/thisRepo> npa:hasCurrentSpaceState ?gsg . }
+          graph ?gsg {
+            ?wKind npa:isMaintainedBy ?wSpace ; npa:hasGoverningSpaceRef ?gref .
+            ?gri a gen:RoleInstantiation ; npa:forSpace ?wSpace ; npa:forSpaceRef ?gref ; npa:hasRoleType ?gtier ; npa:forAgent ?gag .
+            filter(?gtier = gen:AdminRole || ?gtier = gen:MaintainerRole || ?gtier = gen:MemberRole)
+            ?gacct a npa:AccountState ; npa:agent ?gag ; npa:pubkey ?cpk .
+          }
+        }
+      } group by ?wKind ?wSpace
+    }
+  }
+  {
+    select ?authKeys where {
+      service <https://w3id.org/np/l/nanopub-query-1.1/repo/spaces> {
+        select (group_concat(distinct ?pubkey; separator=" ") as ?authKeys) where {
+          values ?_resource_multi_iri { <https://w3id.org/spaces/mvikg/r/kg> }
+          graph npa:graph { npa:thisRepo npa:hasCurrentSpaceState ?stateG . }
+          {
+            graph ?stateG {
+              ?_resource_multi_iri npa:hasGoverningSpaceRef ?spaceRef .
+              ?ri a gen:RoleInstantiation ; npa:forSpaceRef ?spaceRef ; npa:hasRoleType ?roleType ; npa:forAgent ?authAgent .
+              filter(?roleType = gen:AdminRole || ?roleType = gen:MaintainerRole)
+              ?authAcct a npa:AccountState ; npa:agent ?authAgent ; npa:pubkey ?pubkey .
+            }
+          } union {
+            graph ?stateG { ?selfAcct a npa:AccountState ; npa:agent ?_resource_multi_iri ; npa:pubkey ?pubkey . }
+          } union {
+            graph ?stateG { ?pendAcct a npa:PendingAccountState ; npa:agent ?_resource_multi_iri ; npa:pubkey ?pubkey . }
+          }
+        }
+      }
+    }
+  }
+  {
+    graph npa:graph {
+      ?np npx:hasNanopubType gen:ViewDisplay .
+      ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
+      filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+      ?np dct:created ?date .
+      ?np npx:embeds ?display .
+      ?np np:hasAssertion ?a .
+      optional { ?np rdfs:label ?label }
+    }
+    graph ?a {
+      ?display gen:isDisplayOfView ?refView .
+      ?display gen:isDisplayFor   ?_resource_multi_iri .
+      optional { values ?displayType { gen:PartLevelViewDisplay gen:TopLevelViewDisplay } ?display a ?displayType . }
+      optional { values ?displayMode { gen:ActivatedViewDisplay gen:DeactivatedViewDisplay } ?display a ?displayMode . }
+    }
+  }
+  union
+  {
+    select ?refView ?label ?displayType ?displayMode ?np ?pubkey ?date ?_resource_multi_iri ?presetKind {
+      {
+        graph npa:graph {
+          ?np npx:hasNanopubType gen:PresetAssignment .
+          ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
+          filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+          ?np dct:created ?date .
+          ?np npx:embeds ?assignment .
+          ?np np:hasAssertion ?a .
+          optional { ?np rdfs:label ?label }
+        }
+        graph ?a {
+          ?assignment gen:isAssignmentFor      ?_resource_multi_iri .
+          ?assignment gen:isAssignmentOfPreset ?presetRef .
+          optional { values ?displayMode { gen:ActivatedPresetAssignment gen:DeactivatedPresetAssignment } ?assignment a ?displayMode . }
+        }
+        graph npa:graph { ?presetNp npx:embeds ?presetRef ; np:hasAssertion ?pa . }
+        graph ?pa {
+          ?presetRef a gen:Preset .
+          optional { ?presetRef dct:isVersionOf ?presetKindOptional . }
+          { ?presetRef gen:hasTopLevelView ?refView . bind(gen:TopLevelViewDisplay as ?displayType) }
+          union { ?presetRef gen:hasView ?refView . bind(gen:PartLevelViewDisplay as ?displayType) }
+        }
+        bind(coalesce(?presetKindOptional, ?presetRef) as ?presetKind)
+      }
+    }
+  }
+  filter(contains(?authKeys, ?pubkey))
+  optional {
+    graph npa:graph { ?rnp npx:embeds ?refView ; np:hasAssertion ?ra . }
+    graph ?ra { ?refView a gen:ResourceView . }
+    optional { graph ?ra { ?refView dct:isVersionOf ?pinKind ; gen:governedBy ?pinSpace . } }
+    optional {
+      ?vnp npx:embeds ?refView .
+      ?latestNp (npx:supersedes|^npx:supersedes)* ?vnp ; dct:created ?ldate ; npx:embeds ?latestView ; np:hasAssertion ?va ; npa:hasValidSignatureForPublicKeyHash ?invPk .
+      filter not exists { ?supNp npx:supersedes ?latestNp . }
+      filter not exists { ?invNp npx:invalidates ?latestNp ; npa:hasValidSignatureForPublicKeyHash ?invK . filter(str(?invK) = str(?invPk)) }
+      filter not exists {
+        ?other (npx:supersedes|^npx:supersedes)* ?vnp ; dct:created ?odate ; npa:hasValidSignatureForPublicKeyHash ?invPk2 .
+        filter not exists { ?supNp2 npx:supersedes ?other . }
+        filter not exists { ?invNp2 npx:invalidates ?other ; npa:hasValidSignatureForPublicKeyHash ?invK2 . filter(str(?invK2) = str(?invPk2)) }
+        filter(?odate > ?ldate)
+      }
+      graph ?va { ?latestView a gen:ResourceView . optional { ?latestView dct:isVersionOf ?viewKindOptional . } }
+    }
+  }
+  bind(if(bound(?pinSpace),
+          coalesce(iri(strbefore(strafter(?govWinners, concat("|", str(?pinKind), ">", str(?pinSpace), ">")), "|")), ?refView),
+          coalesce(?latestView, ?refView)) as ?currentVersion)
+}
+order by desc(?date)
