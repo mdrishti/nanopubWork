@@ -170,13 +170,6 @@
 
 
 
-    <!-- http://purl.org/dc/terms/isPartOf -->
-
-
-    <owl:AnnotationProperty rdf:about="http://purl.org/dc/terms/isPartOf"/>
-
-
-
     <!-- http://purl.org/dc/terms/issued -->
 
 
@@ -731,13 +724,6 @@
 
 
 
-    <!-- http://purl.org/dc/terms/isPartOf -->
-
-
-    <owl:ObjectProperty rdf:about="http://purl.org/dc/terms/isPartOf"/>
-
-
-
     <!-- http://purl.org/dc/terms/isReplacedBy -->
 
 
@@ -1137,6 +1123,37 @@
 
 
 
+    <!-- https://w3id.org/biolink/vocab/mentioned_by -->
+
+
+    <owl:ObjectProperty rdf:about="https://w3id.org/biolink/vocab/mentioned_by">
+        <rdfs:subPropertyOf rdf:resource="https://w3id.org/biolink/vocab/related_to_at_instance_level"/>
+        <owl:inverseOf rdf:resource="https://w3id.org/biolink/vocab/mentions"/>
+        <rdfs:domain rdf:resource="http://www.w3.org/ns/sosa/Sample"/>
+        <rdfs:range rdf:resource="https://w3id.org/biolink/vocab/Publication"/>
+        <rdfs:label>mentioned by</rdfs:label>
+        <skos:definition>refers to is a relation between one named thing and the information content entity that it makes reference to.</skos:definition>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- https://w3id.org/biolink/vocab/mentions -->
+
+
+    <owl:ObjectProperty rdf:about="https://w3id.org/biolink/vocab/mentions">
+        <rdfs:subPropertyOf rdf:resource="https://w3id.org/biolink/vocab/related_to_at_instance_level"/>
+        <rdfs:domain rdf:resource="https://w3id.org/biolink/vocab/Publication"/>
+        <rdfs:range rdf:resource="http://www.w3.org/ns/sosa/Sample"/>
+        <rdfs:label>mentions</rdfs:label>
+        <skos:definition>refers to is a relation between one information content entity and the named thing that it makes reference to.</skos:definition>
+        <skos:exactMatch rdf:resource="http://purl.obolibrary.org/obo/IAO_0000142"/>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+        <skos:narrowMatch rdf:resource="http://semanticscience.org/resource/SIO_000628"/>
+    </owl:ObjectProperty>
+
+
+
     <!-- https://w3id.org/biolink/vocab/node_property -->
 
 
@@ -1172,6 +1189,20 @@
         <rdfs:domain rdf:resource="https://w3id.org/biolink/vocab/PhenotypicFeature"/>
         <rdfs:range rdf:resource="https://w3id.org/biolink/vocab/BiologicalEntity"/>
         <rdfs:label>phenotype of</rdfs:label>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- https://w3id.org/biolink/vocab/published_in -->
+
+
+    <owl:ObjectProperty rdf:about="https://w3id.org/biolink/vocab/published_in">
+        <rdfs:subPropertyOf rdf:resource="https://w3id.org/biolink/vocab/node_property"/>
+        <rdfs:domain rdf:resource="https://w3id.org/biolink/vocab/Publication"/>
+        <rdfs:label>published in</rdfs:label>
+        <skos:definition>CURIE identifier of a broader publication context within which the publication may be placed, e.g. a specified book or journal.</skos:definition>
+        <skos:exactMatch rdf:resource="https://www.wikidata.org/prop/P1433"/>
         <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
     </owl:ObjectProperty>
 
@@ -1741,6 +1772,21 @@ none is specified.
 
 
 
+    <!-- https://w3id.org/biolink/vocab/base_coordinate -->
+
+
+    <owl:DatatypeProperty rdf:about="https://w3id.org/biolink/vocab/base_coordinate">
+        <rdfs:subPropertyOf rdf:resource="https://w3id.org/biolink/vocab/sequence_localization_attribute"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:label>base coordinate</rdfs:label>
+        <skos:altLabel>fully-closed</skos:altLabel>
+        <skos:altLabel>one-based</skos:altLabel>
+        <skos:definition>A position in the base coordinate system.  Base coordinates start at position 1 instead of position 0.</skos:definition>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+    </owl:DatatypeProperty>
+
+
+
     <!-- https://w3id.org/biolink/vocab/category -->
 
 
@@ -1767,6 +1813,21 @@ none is specified.
         <skos:exactMatch rdf:resource="http://www.w3.org/2004/02/skos/core#definitions"/>
         <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
         <skos:narrowMatch rdf:resource="https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md#Description"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- https://w3id.org/biolink/vocab/end_coordinate -->
+
+
+    <owl:DatatypeProperty rdf:about="https://w3id.org/biolink/vocab/end_coordinate">
+        <rdfs:subPropertyOf rdf:resource="https://w3id.org/biolink/vocab/base_coordinate"/>
+        <rdfs:label>end coordinate</rdfs:label>
+        <skos:altLabel>end</skos:altLabel>
+        <skos:closeMatch rdf:resource="http://biohackathon.org/resource/faldo#end"/>
+        <skos:definition>The position at which the subject genomic entity ends on the chromosome or other entity to which it is located on.</skos:definition>
+        <skos:exactMatch rdf:resource="https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md#end"/>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
     </owl:DatatypeProperty>
 
 
@@ -1820,6 +1881,45 @@ none is specified.
         <skos:editorialNote>Has a value from the Biolink related_to hierarchy. In RDF,  this corresponds to rdf:predicate and in Neo4j this corresponds to the relationship type. The convention is for an edge label in snake_case form. For example, biolink:related_to, biolink:causes, biolink:treats</skos:editorialNote>
         <skos:exactMatch rdf:resource="http://purl.org/oban/association_has_predicate"/>
         <skos:exactMatch rdf:resource="http://www.w3.org/2002/07/owl#annotatedProperty"/>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- https://w3id.org/biolink/vocab/publication_type -->
+
+
+    <owl:DatatypeProperty rdf:about="https://w3id.org/biolink/vocab/publication_type">
+        <rdfs:label>publication type</rdfs:label>
+        <skos:definition>Ontology term for publication type may be drawn from Dublin Core types (https://www.dublincore.org/specifications/dublin-core/dcmi-type-vocabulary/), FRBR-aligned Bibliographic Ontology (https://sparontologies.github.io/fabio/current/fabio.html), the MESH publication types (https://www.nlm.nih.gov/mesh/pubtypes.html), the Confederation of Open Access Repositories (COAR) Controlled Vocabulary for Resource Type Genres (http://vocabularies.coar-repositories.org/documentation/resource_types/), Wikidata (https://www.wikidata.org/wiki/Wikidata:Publication_types), or equivalent publication type ontology. When a given publication type ontology term is used within a given knowledge graph, then the CURIE identified term must be documented in the graph as a concept node of biolink:category biolink:OntologyClass.</skos:definition>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- https://w3id.org/biolink/vocab/sequence_localization_attribute -->
+
+
+    <owl:DatatypeProperty rdf:about="https://w3id.org/biolink/vocab/sequence_localization_attribute">
+        <rdfs:subPropertyOf rdf:resource="https://w3id.org/biolink/vocab/association_slot"/>
+        <rdfs:domain rdf:resource="https://w3id.org/biolink/vocab/GenomicSequenceLocalization"/>
+        <rdfs:label>sequence localization attribute</rdfs:label>
+        <skos:definition>An attribute that can be applied to a genome sequence localization edge. These edges connect a nucleic acid entity such as an exon to an entity such as a chromosome. Edge properties are used to ascribe specific positional information and other metadata to the localization. In pragmatic terms this can be thought of as columns in a GFF3 line.</skos:definition>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- https://w3id.org/biolink/vocab/start_coordinate -->
+
+
+    <owl:DatatypeProperty rdf:about="https://w3id.org/biolink/vocab/start_coordinate">
+        <rdfs:subPropertyOf rdf:resource="https://w3id.org/biolink/vocab/base_coordinate"/>
+        <rdfs:label>start coordinate</rdfs:label>
+        <skos:altLabel>start</skos:altLabel>
+        <skos:closeMatch rdf:resource="http://biohackathon.org/resource/faldo#begin"/>
+        <skos:definition>The position at which the subject genomic entity starts on the chromosome or other entity to which it is located on. (ie: the start of the sequence being referenced is 1).</skos:definition>
+        <skos:exactMatch rdf:resource="https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md#start"/>
         <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
     </owl:DatatypeProperty>
 
@@ -3687,13 +3787,6 @@ none is specified.
 
 
 
-    <!-- http://purl.org/dc/dcmitype/Dataset -->
-
-
-    <owl:Class rdf:about="http://purl.org/dc/dcmitype/Dataset"/>
-
-
-
     <!-- http://qudt.org/schema/qudt/BitEncodingType -->
 
 
@@ -4256,12 +4349,6 @@ The members of the restriction may themselves be restriced by facets that apply 
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://purl.org/dc/terms/isPartOf"/>
-                <owl:allValuesFrom rdf:resource="http://purl.org/dc/dcmitype/Dataset"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
                 <owl:onProperty rdf:resource="http://www.w3.org/ns/sosa/isResultOf"/>
                 <owl:allValuesFrom rdf:resource="http://www.w3.org/ns/sosa/Sampling"/>
             </owl:Restriction>
@@ -4270,6 +4357,12 @@ The members of the restriction may themselves be restriced by facets that apply 
             <owl:Restriction>
                 <owl:onProperty rdf:resource="http://www.w3.org/ns/sosa/isSampleOf"/>
                 <owl:allValuesFrom rdf:resource="http://www.w3.org/ns/sosa/FeatureOfInterest"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/mentioned_by"/>
+                <owl:allValuesFrom rdf:resource="https://w3id.org/biolink/vocab/Publication"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -4436,6 +4529,32 @@ A Sample is intended to sample some FatureOfInterest, so there is an expectation
 
 
 
+    <!-- https://w3id.org/biolink/vocab/Article -->
+
+
+    <owl:Class rdf:about="https://w3id.org/biolink/vocab/Article">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/biolink/vocab/Publication"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/published_in"/>
+                <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/published_in"/>
+                <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:label>article</rdfs:label>
+        <skos:definition>a piece of writing on a particular topic presented as a stand-alone section of a larger publication</skos:definition>
+        <skos:exactMatch rdf:resource="http://purl.org/spar/fabio/article"/>
+        <skos:exactMatch rdf:resource="http://semanticscience.org/resource/SIO_000154"/>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+    </owl:Class>
+
+
+
     <!-- https://w3id.org/biolink/vocab/Association -->
 
 
@@ -4582,6 +4701,109 @@ A Sample is intended to sample some FatureOfInterest, so there is an expectation
 
 
 
+    <!-- https://w3id.org/biolink/vocab/Book -->
+
+
+    <owl:Class rdf:about="https://w3id.org/biolink/vocab/Book">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/biolink/vocab/Publication"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/id"/>
+                <owl:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/type"/>
+                <owl:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/id"/>
+                <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/id"/>
+                <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:label>book</rdfs:label>
+        <skos:definition>This class may rarely be instantiated except if use cases of a given knowledge graph support its utility.</skos:definition>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+    </owl:Class>
+
+
+
+    <!-- https://w3id.org/biolink/vocab/BookChapter -->
+
+
+    <owl:Class rdf:about="https://w3id.org/biolink/vocab/BookChapter">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/biolink/vocab/Publication"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/published_in"/>
+                <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/published_in"/>
+                <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:label>book chapter</rdfs:label>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+    </owl:Class>
+
+
+
+    <!-- https://w3id.org/biolink/vocab/ChemicalEntity -->
+
+
+    <owl:Class rdf:about="https://w3id.org/biolink/vocab/ChemicalEntity">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/biolink/vocab/NamedThing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/linkml/mixins"/>
+                <owl:someValuesFrom rdf:resource="https://w3id.org/biolink/vocab/ChemicalEntityOrGeneOrGeneProduct"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/linkml/mixins"/>
+                <owl:someValuesFrom rdf:resource="https://w3id.org/biolink/vocab/ChemicalEntityOrProteinOrPolypeptide"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/linkml/mixins"/>
+                <owl:someValuesFrom rdf:resource="https://w3id.org/biolink/vocab/ChemicalOrDrugOrTreatment"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/linkml/mixins"/>
+                <owl:someValuesFrom rdf:resource="https://w3id.org/biolink/vocab/PhysicalEssence"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:label>chemical entity</rdfs:label>
+        <skos:broadMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T167"/>
+        <skos:definition>A chemical entity is a physical entity that pertains to chemistry or biochemistry.</skos:definition>
+        <skos:exactMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T103"/>
+        <skos:exactMatch rdf:resource="http://purl.obolibrary.org/obo/CHEBI_24431"/>
+        <skos:exactMatch rdf:resource="http://semanticscience.org/resource/SIO_010004"/>
+        <skos:exactMatch rdf:resource="https://www.wikidata.org/entity/Q79529"/>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+        <skos:narrowMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T123"/>
+        <skos:narrowMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T131"/>
+        <skos:narrowMatch rdf:resource="https://www.wikidata.org/entity/Q43460564"/>
+    </owl:Class>
+
+
+
     <!-- https://w3id.org/biolink/vocab/ChemicalEntityOrGeneOrGeneProduct -->
 
 
@@ -4589,6 +4811,29 @@ A Sample is intended to sample some FatureOfInterest, so there is an expectation
         <rdfs:subClassOf rdf:resource="https://w3id.org/linkml/ClassDefinition#Mixin"/>
         <rdfs:label>chemical entity or gene or gene product</rdfs:label>
         <skos:definition>A union of chemical entities and children, and gene or gene product. This mixin is helpful to use when searching across chemical entities that must include genes and their children as chemical entities.</skos:definition>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+    </owl:Class>
+
+
+
+    <!-- https://w3id.org/biolink/vocab/ChemicalEntityOrProteinOrPolypeptide -->
+
+
+    <owl:Class rdf:about="https://w3id.org/biolink/vocab/ChemicalEntityOrProteinOrPolypeptide">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/linkml/ClassDefinition#Mixin"/>
+        <rdfs:label>chemical entity or protein or polypeptide</rdfs:label>
+        <skos:definition>A union of chemical entities and children, and protein and polypeptide. This mixin is helpful to use when searching across chemical entities that must include genes and their children as chemical entities.</skos:definition>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+    </owl:Class>
+
+
+
+    <!-- https://w3id.org/biolink/vocab/ChemicalOrDrugOrTreatment -->
+
+
+    <owl:Class rdf:about="https://w3id.org/biolink/vocab/ChemicalOrDrugOrTreatment">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/linkml/ClassDefinition#Mixin"/>
+        <rdfs:label>chemical or drug or treatment</rdfs:label>
         <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
     </owl:Class>
 
@@ -4610,6 +4855,19 @@ A Sample is intended to sample some FatureOfInterest, so there is an expectation
         <skos:definition>Either one of a disease or an individual phenotypic feature. Some knowledge resources such as Monarch treat these as distinct, others such as MESH conflate.  Please see definitions of phenotypic feature and disease in this model for their independent descriptions.  This class is helpful to enforce domains and ranges that may involve either a disease or a phenotypic feature.</skos:definition>
         <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
         <skos:narrowMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T033"/>
+    </owl:Class>
+
+
+
+    <!-- https://w3id.org/biolink/vocab/DrugLabel -->
+
+
+    <owl:Class rdf:about="https://w3id.org/biolink/vocab/DrugLabel">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/biolink/vocab/Publication"/>
+        <rdfs:label>drug label</rdfs:label>
+        <skos:broadMatch rdf:resource="http://purl.obolibrary.org/obo/ncit#C41203"/>
+        <skos:definition>a document accompanying a drug or its container that provides written, printed or graphic information about the drug, including drug contents, specific instructions or warnings for administration, storage and disposal instructions, etc.</skos:definition>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
     </owl:Class>
 
 
@@ -4743,6 +5001,102 @@ A Sample is intended to sample some FatureOfInterest, so there is an expectation
 
 
 
+    <!-- https://w3id.org/biolink/vocab/GenomicSequenceLocalization -->
+
+
+    <owl:Class rdf:about="https://w3id.org/biolink/vocab/GenomicSequenceLocalization">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/biolink/vocab/SequenceAssociation"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/object"/>
+                <owl:allValuesFrom rdf:resource="https://w3id.org/biolink/vocab/NucleicAcidEntity"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/subject"/>
+                <owl:allValuesFrom rdf:resource="https://w3id.org/biolink/vocab/NucleicAcidEntity"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/object"/>
+                <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/subject"/>
+                <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/object"/>
+                <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/subject"/>
+                <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/predicate"/>
+                <owl:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/predicate"/>
+                <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/predicate"/>
+                <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:label>genomic sequence localization</rdfs:label>
+        <skos:broadMatch rdf:resource="https://datacommons.org/browser/Chromosome"/>
+        <skos:definition>A relationship between a sequence feature and a nucleic acid entity it is localized to. The reference entity may be a chromosome, chromosome region or information entity such as a contig.</skos:definition>
+        <skos:exactMatch rdf:resource="https://datacommons.org/browser/GenomeAnnotation"/>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+    </owl:Class>
+
+
+
+    <!-- https://w3id.org/biolink/vocab/InformationContentEntity -->
+
+
+    <owl:Class rdf:about="https://w3id.org/biolink/vocab/InformationContentEntity">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/biolink/vocab/NamedThing"/>
+        <rdfs:label>information content entity</rdfs:label>
+        <skos:altLabel>information</skos:altLabel>
+        <skos:altLabel>information artefact</skos:altLabel>
+        <skos:altLabel>information entity</skos:altLabel>
+        <skos:definition>a piece of information that typically describes some topic of discourse or is used as support.</skos:definition>
+        <skos:exactMatch rdf:resource="http://purl.obolibrary.org/obo/IAO_0000030"/>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+        <skos:narrowMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T077"/>
+        <skos:narrowMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T078"/>
+        <skos:narrowMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T079"/>
+        <skos:narrowMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T080"/>
+        <skos:narrowMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T081"/>
+        <skos:narrowMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T082"/>
+        <skos:narrowMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T089"/>
+        <skos:narrowMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T102"/>
+        <skos:narrowMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T169"/>
+        <skos:narrowMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T171"/>
+        <skos:narrowMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T185"/>
+        <skos:narrowMatch rdf:resource="https://lhncbc.nlm.nih.gov/semanticnetwork/download/sg_archive/SemGroups-v04.txtCONC"/>
+    </owl:Class>
+
+
+
     <!-- https://w3id.org/biolink/vocab/KnowledgeLevelEnum -->
 
 
@@ -4783,6 +5137,28 @@ A Sample is intended to sample some FatureOfInterest, so there is an expectation
 
 
 
+    <!-- https://w3id.org/biolink/vocab/MolecularEntity -->
+
+
+    <owl:Class rdf:about="https://w3id.org/biolink/vocab/MolecularEntity">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/biolink/vocab/ChemicalEntity"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/linkml/mixins"/>
+                <owl:someValuesFrom rdf:resource="https://w3id.org/biolink/vocab/OntologyClass"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:label>molecular entity</rdfs:label>
+        <skos:definition>A molecular entity is a chemical entity composed of individual or covalently bonded atoms.</skos:definition>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+        <skos:narrowMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T085"/>
+        <skos:narrowMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T088"/>
+        <skos:narrowMatch rdf:resource="http://purl.obolibrary.org/obo/CHEBI_23367"/>
+        <skos:narrowMatch rdf:resource="https://bioschemas.org/MolecularEntity"/>
+    </owl:Class>
+
+
+
     <!-- https://w3id.org/biolink/vocab/NamedThing -->
 
 
@@ -4808,6 +5184,47 @@ A Sample is intended to sample some FatureOfInterest, so there is an expectation
         <skos:exactMatch rdf:resource="https://lhncbc.nlm.nih.gov/semanticnetwork/download/sg_archive/SemGroups-v04.txtOBJC"/>
         <skos:exactMatch rdf:resource="https://www.wikidata.org/entity/Q35120"/>
         <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+    </owl:Class>
+
+
+
+    <!-- https://w3id.org/biolink/vocab/NucleicAcidEntity -->
+
+
+    <owl:Class rdf:about="https://w3id.org/biolink/vocab/NucleicAcidEntity">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/biolink/vocab/MolecularEntity"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/linkml/mixins"/>
+                <owl:someValuesFrom rdf:resource="https://w3id.org/biolink/vocab/GenomicEntity"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/linkml/mixins"/>
+                <owl:someValuesFrom rdf:resource="https://w3id.org/biolink/vocab/OntologyClass"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/linkml/mixins"/>
+                <owl:someValuesFrom rdf:resource="https://w3id.org/biolink/vocab/PhysicalEssence"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/linkml/mixins"/>
+                <owl:someValuesFrom rdf:resource="https://w3id.org/biolink/vocab/ThingWithTaxon"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:label>nucleic acid entity</rdfs:label>
+        <skos:altLabel>genomic entity</skos:altLabel>
+        <skos:altLabel>sequence feature</skos:altLabel>
+        <skos:definition>A nucleic acid entity is a molecular entity characterized by availability in gene databases of nucleotide-based sequence representations of its precise sequence; for convenience of representation, partial sequences of various kinds are included.</skos:definition>
+        <skos:exactMatch rdf:resource="http://purl.obolibrary.org/obo/SO_0000110"/>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+        <skos:narrowMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T086"/>
+        <skos:narrowMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T114"/>
     </owl:Class>
 
 
@@ -4844,6 +5261,21 @@ A Sample is intended to sample some FatureOfInterest, so there is an expectation
         <skos:exactMatch rdf:resource="https://www.wikidata.org/entity/Q16521"/>
         <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
         <skos:narrowMatch rdf:resource="https://datacommons.org/browser/BiologicalSpecies"/>
+    </owl:Class>
+
+
+
+    <!-- https://w3id.org/biolink/vocab/Patent -->
+
+
+    <owl:Class rdf:about="https://w3id.org/biolink/vocab/Patent">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/biolink/vocab/Publication"/>
+        <rdfs:label>patent</rdfs:label>
+        <skos:definition>a legal document granted by a patent issuing authority which confers upon the patenter the sole right to make, use and sell an invention for a set period of time.</skos:definition>
+        <skos:exactMatch rdf:resource="http://purl.obolibrary.org/obo/IAO_0000313"/>
+        <skos:exactMatch rdf:resource="http://purl.org/spar/fabio/Patent"/>
+        <skos:exactMatch rdf:resource="http://semanticscience.org/resource/SIO_000153"/>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
     </owl:Class>
 
 
@@ -4912,6 +5344,77 @@ A Sample is intended to sample some FatureOfInterest, so there is an expectation
 
 
 
+    <!-- https://w3id.org/biolink/vocab/PreprintPublication -->
+
+
+    <owl:Class rdf:about="https://w3id.org/biolink/vocab/PreprintPublication">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/biolink/vocab/Publication"/>
+        <rdfs:label>preprint publication</rdfs:label>
+        <skos:definition>a document reresenting an early version of an author&apos;s original scholarly work, such as a research paper or a review, prior to formal peer review and publication in a peer-reviewed scholarly or scientific journal.</skos:definition>
+        <skos:exactMatch rdf:resource="http://purl.org/spar/fabio/Preprint"/>
+        <skos:exactMatch rdf:resource="http://www.ebi.ac.uk/efo/EFO_0010558"/>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+    </owl:Class>
+
+
+
+    <!-- https://w3id.org/biolink/vocab/Publication -->
+
+
+    <owl:Class rdf:about="https://w3id.org/biolink/vocab/Publication">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/biolink/vocab/InformationContentEntity"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/id"/>
+                <owl:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/publication_type"/>
+                <owl:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/id"/>
+                <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/publication_type"/>
+                <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/id"/>
+                <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:label>publication</rdfs:label>
+        <skos:definition>Any ‘published’ piece of information. Publications are considered broadly to include any document or document part made available in print or on the web - which may include scientific journal issues, individual articles, and books - as well as things like pre-prints, white papers, patents, drug labels, web pages, protocol documents,  and even a part of a publication if of significant knowledge scope (e.g. a figure, figure legend, or section highlighted by NLP).</skos:definition>
+        <skos:exactMatch rdf:resource="http://purl.obolibrary.org/obo/IAO_0000311"/>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+        <skos:narrowMatch rdf:resource="http://purl.bioontology.org/ontology/STY/T170"/>
+        <skos:narrowMatch rdf:resource="http://purl.obolibrary.org/obo/IAO_0000013"/>
+    </owl:Class>
+
+
+
+    <!-- https://w3id.org/biolink/vocab/SequenceAssociation -->
+
+
+    <owl:Class rdf:about="https://w3id.org/biolink/vocab/SequenceAssociation">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/biolink/vocab/Association"/>
+        <rdfs:label>sequence association</rdfs:label>
+        <skos:definition>An association between a sequence feature and a nucleic acid entity it is localized to.</skos:definition>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+    </owl:Class>
+
+
+
     <!-- https://w3id.org/biolink/vocab/SequenceVariant -->
 
 
@@ -4971,6 +5474,43 @@ A Sample is intended to sample some FatureOfInterest, so there is an expectation
         <skos:exactMatch rdf:resource="https://www.wikidata.org/entity/Q15304597"/>
         <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
         <skos:note>This class is for modeling the specific state at a locus. A single DBSNP rs ID could correspond to more than one sequence variants (e.g CIViC:1252 and CIViC:1253, two distinct BRCA2 alleles for rs28897743)</skos:note>
+    </owl:Class>
+
+
+
+    <!-- https://w3id.org/biolink/vocab/Serial -->
+
+
+    <owl:Class rdf:about="https://w3id.org/biolink/vocab/Serial">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/biolink/vocab/Publication"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/id"/>
+                <owl:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/type"/>
+                <owl:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/id"/>
+                <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/id"/>
+                <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:label>serial</rdfs:label>
+        <skos:altLabel>journal</skos:altLabel>
+        <skos:definition>This class may rarely be instantiated except if use cases of a given knowledge graph support its utility.</skos:definition>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
     </owl:Class>
 
 
@@ -5047,6 +5587,21 @@ A Sample is intended to sample some FatureOfInterest, so there is an expectation
         </rdfs:subClassOf>
         <rdfs:label>variant to gene association</rdfs:label>
         <skos:definition>An association between a variant and a gene, where the variant has a genetic association with the gene (i.e. is in linkage disequilibrium)</skos:definition>
+        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
+    </owl:Class>
+
+
+
+    <!-- https://w3id.org/biolink/vocab/WebPage -->
+
+
+    <owl:Class rdf:about="https://w3id.org/biolink/vocab/WebPage">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/biolink/vocab/Publication"/>
+        <rdfs:label>web page</rdfs:label>
+        <skos:definition>a document that is published according to World Wide Web standards, which may incorporate text, graphics, sound, and/or other features.</skos:definition>
+        <skos:exactMatch rdf:resource="http://purl.obolibrary.org/obo/ncit#C142749"/>
+        <skos:exactMatch rdf:resource="http://purl.org/spar/fabio/WebPage"/>
+        <skos:exactMatch rdf:resource="http://semanticscience.org/resource/SIO_000302"/>
         <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
     </owl:Class>
 
@@ -6869,16 +7424,6 @@ THE UCUM TABLE (IN ALL FORMATS), UCUM DEFINITIONS, AND SPECIFICATION ARE PROVIDE
      -->
 
 
-    <rdf:Description rdf:about="http://purl.org/dc/terms/isPartOf">
-        <dc:type rdf:resource="http://dublincore.org/usage/documents/principles/#element-refinement"/>
-        <terms:hasVersion rdf:resource="http://dublincore.org/usage/terms/history/#isPartOf-002"/>
-        <terms:issued>2000-07-11</terms:issued>
-        <terms:modified>2002-06-15</terms:modified>
-        <rdfs:comment xml:lang="en-us">The described resource is a physical or logical part of the
-            referenced resource.</rdfs:comment>
-        <rdfs:isDefinedBy rdf:resource="http://purl.org/dc/terms/"/>
-        <rdfs:label xml:lang="en-us">Is Part Of</rdfs:label>
-    </rdf:Description>
     <rdf:Description rdf:about="http://qudt.org/schema/qudt/CardinalityType">
         <terms:description rdf:datatype="http://qudt.org/schema/qudt/LatexString">
   In mathematics, the cardinality of a set is a measure of the number of elements of the set.
