@@ -990,41 +990,6 @@
 
 
 
-    <!-- https://w3id.org/biolink/vocab/form_or_variant_qualifier -->
-
-
-    <owl:ObjectProperty rdf:about="https://w3id.org/biolink/vocab/form_or_variant_qualifier">
-        <rdfs:subPropertyOf rdf:resource="https://w3id.org/biolink/vocab/qualifier"/>
-    </owl:ObjectProperty>
-
-
-
-    <!-- https://w3id.org/biolink/vocab/has_gene -->
-
-
-    <owl:ObjectProperty rdf:about="https://w3id.org/biolink/vocab/has_gene">
-        <rdfs:subPropertyOf rdf:resource="https://w3id.org/biolink/vocab/has_gene_or_gene_product"/>
-        <rdfs:range rdf:resource="https://w3id.org/biolink/vocab/Gene"/>
-        <rdfs:label>has gene</rdfs:label>
-        <skos:definition>connects an entity associated with one or more genes</skos:definition>
-        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
-    </owl:ObjectProperty>
-
-
-
-    <!-- https://w3id.org/biolink/vocab/has_gene_or_gene_product -->
-
-
-    <owl:ObjectProperty rdf:about="https://w3id.org/biolink/vocab/has_gene_or_gene_product">
-        <rdfs:subPropertyOf rdf:resource="https://w3id.org/biolink/vocab/node_property"/>
-        <rdfs:range rdf:resource="https://w3id.org/biolink/vocab/Gene"/>
-        <rdfs:label>has gene or gene product</rdfs:label>
-        <skos:definition>connects an entity with one or more gene or gene products</skos:definition>
-        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
-    </owl:ObjectProperty>
-
-
-
     <!-- https://w3id.org/biolink/vocab/has_phenotype -->
 
 
@@ -1203,17 +1168,6 @@
         <rdfs:label>published in</rdfs:label>
         <skos:definition>CURIE identifier of a broader publication context within which the publication may be placed, e.g. a specified book or journal.</skos:definition>
         <skos:exactMatch rdf:resource="https://www.wikidata.org/prop/P1433"/>
-        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
-    </owl:ObjectProperty>
-
-
-
-    <!-- https://w3id.org/biolink/vocab/qualifier -->
-
-
-    <owl:ObjectProperty rdf:about="https://w3id.org/biolink/vocab/qualifier">
-        <rdfs:label>qualifier</rdfs:label>
-        <skos:definition>grouping slot for all qualifiers on an edge.  useful for testing compliance with association classes</skos:definition>
         <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
     </owl:ObjectProperty>
 
@@ -1829,13 +1783,6 @@ none is specified.
         <skos:exactMatch rdf:resource="https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md#end"/>
         <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
     </owl:DatatypeProperty>
-
-
-
-    <!-- https://w3id.org/biolink/vocab/form_or_variant_qualifier -->
-
-
-    <owl:DatatypeProperty rdf:about="https://w3id.org/biolink/vocab/form_or_variant_qualifier"/>
 
 
 
@@ -4628,12 +4575,6 @@ A Sample is intended to sample some FatureOfInterest, so there is an expectation
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/qualifier"/>
-                <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
                 <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/subject"/>
                 <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
             </owl:Restriction>
@@ -5440,12 +5381,6 @@ A Sample is intended to sample some FatureOfInterest, so there is an expectation
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/has_gene"/>
-                <owl:allValuesFrom rdf:resource="https://w3id.org/biolink/vocab/Gene"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
                 <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/id"/>
                 <owl:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
             </owl:Restriction>
@@ -5522,71 +5457,6 @@ A Sample is intended to sample some FatureOfInterest, so there is an expectation
         <rdfs:subClassOf rdf:resource="https://w3id.org/linkml/ClassDefinition#Mixin"/>
         <rdfs:label>thing with taxon</rdfs:label>
         <skos:definition>A mixin that can be used on any entity that can be taxonomically classified. This includes individual organisms; genes, their products and other molecular entities; body parts; biological processes</skos:definition>
-        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
-    </owl:Class>
-
-
-
-    <!-- https://w3id.org/biolink/vocab/VariantToEntityAssociationMixin -->
-
-
-    <owl:Class rdf:about="https://w3id.org/biolink/vocab/VariantToEntityAssociationMixin">
-        <rdfs:subClassOf rdf:resource="https://w3id.org/linkml/ClassDefinition#Mixin"/>
-        <rdfs:label>variant to entity association mixin</rdfs:label>
-        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
-    </owl:Class>
-
-
-
-    <!-- https://w3id.org/biolink/vocab/VariantToGeneAssociation -->
-
-
-    <owl:Class rdf:about="https://w3id.org/biolink/vocab/VariantToGeneAssociation">
-        <rdfs:subClassOf rdf:resource="https://w3id.org/biolink/vocab/Association"/>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="https://w3id.org/linkml/mixins"/>
-                <owl:someValuesFrom rdf:resource="https://w3id.org/biolink/vocab/VariantToEntityAssociationMixin"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/object"/>
-                <owl:allValuesFrom rdf:resource="https://w3id.org/biolink/vocab/Gene"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/object"/>
-                <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minCardinality>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/object"/>
-                <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/predicate"/>
-                <owl:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/predicate"/>
-                <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minCardinality>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/predicate"/>
-                <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:label>variant to gene association</rdfs:label>
-        <skos:definition>An association between a variant and a gene, where the variant has a genetic association with the gene (i.e. is in linkage disequilibrium)</skos:definition>
         <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
     </owl:Class>
 
@@ -7474,12 +7344,6 @@ THE UCUM TABLE (IN ALL FORMATS), UCUM DEFINITIONS, AND SPECIFICATION ARE PROVIDE
         <skos:definition xml:lang="en">Relates a concept to a concept that is more general in meaning.</skos:definition>
         <skos:scopeNote xml:lang="en">By convention, skos:broader is only used to assert an immediate (i.e. direct) hierarchical link between two conceptual resources.</skos:scopeNote>
     </rdf:Description>
-    <rdf:Description rdf:about="https://w3id.org/biolink/vocab/form_or_variant_qualifier">
-        <rdfs:label>form or variant qualifier</rdfs:label>
-        <skos:definition>A qualifier that composes with a core subject/object concept to define a specific type, variant, alternative version of this concept. The composed concept remains a subtype or instance of the core concept. For example, the qualifier ‘mutation’ combines with the core concept ‘Gene X’ to express the compose concept ‘a mutation of Gene X’.</skos:definition>
-        <skos:editorialNote>please see the ChemicalOrGeneOrGeneProductFormOrVariantEnum (below) for examples of &apos;form or variant qualifier&apos; terms in the gene-&gt;chemical association space. the qualifier ‘mutation’ combines with the core concept ‘Gene X’ to express the compose concept ‘Mutated forms of Gene X’. the qualifier ‘late stage’ combines with a core concept of ‘Disease X’ to express the  more specific concept ‘Late Stage forms of Disease X’ the qualifier ‘recombinant’ combines with a core concept of ‘FLT1 Gene’ to express the composed concept ‘Recombinant forms of the FLT1 gene’ the qualifier ‘chemical analog’ combines with a core concept of ‘Ditiocarb’ to express the composed concept ‘analog forms of Ditiocarb’</skos:editorialNote>
-        <skos:inScheme rdf:resource="https://w3id.org/biolink/biolink-model"/>
-    </rdf:Description>
 
 
 
@@ -7538,96 +7402,6 @@ THE UCUM TABLE (IN ALL FORMATS), UCUM DEFINITIONS, AND SPECIFICATION ARE PROVIDE
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/in_taxon"/>
-                <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-    </owl:Restriction>
-    <owl:Restriction>
-        <owl:onProperty rdf:resource="https://w3id.org/linkml/mixins"/>
-        <owl:someValuesFrom rdf:resource="https://w3id.org/biolink/vocab/VariantToEntityAssociationMixin"/>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/object"/>
-                <owl:allValuesFrom rdf:resource="https://w3id.org/biolink/vocab/NamedThing"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-    </owl:Restriction>
-    <owl:Restriction>
-        <owl:onProperty rdf:resource="https://w3id.org/linkml/mixins"/>
-        <owl:someValuesFrom rdf:resource="https://w3id.org/biolink/vocab/VariantToEntityAssociationMixin"/>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/subject"/>
-                <owl:allValuesFrom rdf:resource="https://w3id.org/biolink/vocab/SequenceVariant"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-    </owl:Restriction>
-    <owl:Restriction>
-        <owl:onProperty rdf:resource="https://w3id.org/linkml/mixins"/>
-        <owl:someValuesFrom rdf:resource="https://w3id.org/biolink/vocab/VariantToEntityAssociationMixin"/>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/object"/>
-                <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minCardinality>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-    </owl:Restriction>
-    <owl:Restriction>
-        <owl:onProperty rdf:resource="https://w3id.org/linkml/mixins"/>
-        <owl:someValuesFrom rdf:resource="https://w3id.org/biolink/vocab/VariantToEntityAssociationMixin"/>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/subject"/>
-                <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minCardinality>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-    </owl:Restriction>
-    <owl:Restriction>
-        <owl:onProperty rdf:resource="https://w3id.org/linkml/mixins"/>
-        <owl:someValuesFrom rdf:resource="https://w3id.org/biolink/vocab/VariantToEntityAssociationMixin"/>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/object"/>
-                <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-    </owl:Restriction>
-    <owl:Restriction>
-        <owl:onProperty rdf:resource="https://w3id.org/linkml/mixins"/>
-        <owl:someValuesFrom rdf:resource="https://w3id.org/biolink/vocab/VariantToEntityAssociationMixin"/>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/subject"/>
-                <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-    </owl:Restriction>
-    <owl:Restriction>
-        <owl:onProperty rdf:resource="https://w3id.org/linkml/mixins"/>
-        <owl:someValuesFrom rdf:resource="https://w3id.org/biolink/vocab/VariantToEntityAssociationMixin"/>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/predicate"/>
-                <owl:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-    </owl:Restriction>
-    <owl:Restriction>
-        <owl:onProperty rdf:resource="https://w3id.org/linkml/mixins"/>
-        <owl:someValuesFrom rdf:resource="https://w3id.org/biolink/vocab/VariantToEntityAssociationMixin"/>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/predicate"/>
-                <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minCardinality>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-    </owl:Restriction>
-    <owl:Restriction>
-        <owl:onProperty rdf:resource="https://w3id.org/linkml/mixins"/>
-        <owl:someValuesFrom rdf:resource="https://w3id.org/biolink/vocab/VariantToEntityAssociationMixin"/>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="https://w3id.org/biolink/vocab/predicate"/>
                 <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
             </owl:Restriction>
         </rdfs:subClassOf>
